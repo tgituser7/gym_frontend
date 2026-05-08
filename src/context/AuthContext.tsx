@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useEffect, useState, useCallback, ReactNode } from 'react';
 import { Branch } from '@/types';
-import { setApiToken } from '@/lib/api';
+import { setApiToken, setOnUnauthorized } from '@/lib/api';
 
 interface AuthContextType {
   token: string | null;
@@ -18,6 +18,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [token, setToken] = useState<string | null>(null);
   const [branch, setBranch] = useState<Branch | null>(null);
   const [loading, setLoading] = useState(true);
+
+  const logout = useCallback(() => {
+    localStorage.removeItem('gym_token');
+    localStorage.removeItem('branch_data');
+    setToken(null);
+    setBranch(null);
+    setApiToken(null);
+  }, []);
+
+  // Register 401 handler once; logout is stable so this never re-runs
+  useEffect(() => {
+    setOnUnauthorized(logout);
+    return () => setOnUnauthorized(null);
+  }, [logout]);
 
   useEffect(() => {
     const storedToken = localStorage.getItem('gym_token');
@@ -36,14 +50,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setToken(newToken);
     setBranch(newBranch);
     setApiToken(newToken);
-  }, []);
-
-  const logout = useCallback(() => {
-    localStorage.removeItem('gym_token');
-    localStorage.removeItem('branch_data');
-    setToken(null);
-    setBranch(null);
-    setApiToken(null);
   }, []);
 
   return (

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
+import { Menu, Zap } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import Sidebar from './Sidebar';
 
@@ -13,6 +14,7 @@ export default function AuthenticatedLayout({ children }: { children: React.Reac
   const router = useRouter();
   const isAuthPage = AUTH_ROUTES.includes(pathname);
   const [redirecting, setRedirecting] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
     if (loading) return;
@@ -27,6 +29,9 @@ export default function AuthenticatedLayout({ children }: { children: React.Reac
     }
   }, [token, loading, isAuthPage, router]);
 
+  // Close sidebar on route change (mobile nav)
+  useEffect(() => { setSidebarOpen(false); }, [pathname]);
+
   if (loading || redirecting) {
     return (
       <div className="flex h-screen items-center justify-center bg-gray-50">
@@ -39,10 +44,30 @@ export default function AuthenticatedLayout({ children }: { children: React.Reac
 
   return (
     <div className="flex h-screen overflow-hidden">
-      <Sidebar />
-      <main className="flex-1 overflow-y-auto bg-gray-50">
-        <div className="p-6 max-w-7xl mx-auto">{children}</div>
-      </main>
+      <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+
+      <div className="flex-1 flex flex-col overflow-hidden">
+        {/* Mobile top bar */}
+        <header className="sm:hidden flex items-center gap-3 px-4 py-3 bg-slate-900 text-white shrink-0">
+          <button
+            onClick={() => setSidebarOpen(true)}
+            className="p-1 rounded-lg hover:bg-slate-700 transition-colors"
+            aria-label="Open menu"
+          >
+            <Menu className="w-5 h-5" />
+          </button>
+          <div className="flex items-center gap-2">
+            <div className="w-6 h-6 bg-orange-500 rounded flex items-center justify-center">
+              <Zap className="w-3.5 h-3.5 text-white" />
+            </div>
+            <span className="font-bold text-sm">FlexMS</span>
+          </div>
+        </header>
+
+        <main className="flex-1 overflow-y-auto bg-gray-50">
+          <div className="p-4 sm:p-6 max-w-7xl mx-auto">{children}</div>
+        </main>
+      </div>
     </div>
   );
 }

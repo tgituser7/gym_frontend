@@ -68,7 +68,7 @@ export interface Member {
   _id: string;
   branch: Branch | string;
   name: string;
-  email: string;
+  email?: string;
   phone?: string;
   address?: string;
   dateOfBirth?: string;

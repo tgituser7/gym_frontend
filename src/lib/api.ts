@@ -1,12 +1,16 @@
 import { Member, Staff, Service, Fee, Branch, DashboardStats } from '@/types';
 
-// const BASE_URL = "https://facechatappbackend.onrender.com/api" || 'http://localhost:5000/api';
-const BASE_URL = "https://facechatappbackend.onrender.com/api"
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api'
 
 let _token: string | null = null;
+let _onUnauthorized: (() => void) | null = null;
 
 export function setApiToken(token: string | null): void {
   _token = token;
+}
+
+export function setOnUnauthorized(cb: (() => void) | null): void {
+  _onUnauthorized = cb;
 }
 
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
@@ -17,6 +21,10 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
     },
     ...options,
   });
+  if (res.status === 401) {
+    _onUnauthorized?.();
+    throw new Error('Session expired. Please log in again.');
+  }
   if (!res.ok) {
     const err = await res.json().catch(() => ({ error: 'Request failed' }));
     throw new Error((err as { error: string }).error || 'Request failed');

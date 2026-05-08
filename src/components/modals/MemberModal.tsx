@@ -29,6 +29,12 @@ const STATUS_STYLES: Record<string, string> = {
   overdue: 'bg-red-100 text-red-700',
 };
 
+const STATUS_LABELS: Record<string, string> = {
+  paid: 'Paid',
+  pending: 'Due',
+  overdue: 'Overdue',
+};
+
 export default function MemberModal({ member, onClose, onSaved }: Props) {
   const [form, setForm] = useState({ ...EMPTY });
   const [services, setServices] = useState<Service[]>([]);
@@ -74,6 +80,7 @@ export default function MemberModal({ member, onClose, onSaved }: Props) {
     try {
       const payload = {
         ...form,
+        email: form.email || undefined,
         gender: form.gender || undefined,
         dateOfBirth: form.dateOfBirth || undefined,
         membershipEndDate: form.membershipEndDate || undefined,
@@ -100,7 +107,7 @@ export default function MemberModal({ member, onClose, onSaved }: Props) {
         {error && <div className="bg-red-50 text-red-600 px-3 py-2 rounded-lg text-sm">{error}</div>}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div><label className="label">Full Name *</label><input className="input" required value={form.name} onChange={(e) => set('name', e.target.value)} /></div>
-          <div><label className="label">Email *</label><input className="input" type="email" required value={form.email} onChange={(e) => set('email', e.target.value)} /></div>
+          <div><label className="label">Email</label><input className="input" type="email" value={form.email} onChange={(e) => set('email', e.target.value)} /></div>
           <div><label className="label">Phone</label><input className="input" value={form.phone} onChange={(e) => set('phone', e.target.value)} /></div>
           <div>
             <label className="label">Gender</label>
@@ -160,8 +167,8 @@ export default function MemberModal({ member, onClose, onSaved }: Props) {
                     <p className="text-sm font-medium text-gray-900">₹{f.amount.toLocaleString()}</p>
                     <p className="text-xs text-gray-500">{f.description || 'Fee'} · Due {new Date(f.dueDate).toLocaleDateString()}</p>
                   </div>
-                  <span className={`text-xs font-medium px-2 py-0.5 rounded-full capitalize ${STATUS_STYLES[f.status]}`}>
-                    {f.status}
+                  <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${STATUS_STYLES[f.status]}`}>
+                    {STATUS_LABELS[f.status] ?? f.status}
                   </span>
                 </div>
               ))}

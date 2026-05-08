@@ -53,28 +53,25 @@ export default function MembersPage() {
   const handleSaved = (member: Member) => {
     setMembers((prev) => {
       const idx = prev.findIndex((m) => m._id === member._id);
-      if (idx >= 0) {
-        const next = [...prev];
-        next[idx] = member;
-        return next;
-      }
+      if (idx >= 0) { const next = [...prev]; next[idx] = member; return next; }
       return [member, ...prev];
     });
     setModalOpen(false);
   };
 
+  const openEdit = (m: Member) => { setSelected(m); setModalOpen(true); };
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">Members</h2>
-          <p className="text-gray-500 text-sm mt-1">{members.length} total members</p>
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-900">Members</h2>
+          <p className="text-gray-500 text-sm mt-0.5">{members.length} total members</p>
         </div>
-        <button
-          className="btn-primary"
-          onClick={() => { setSelected(null); setModalOpen(true); }}
-        >
-          <Plus className="w-4 h-4" /> Add Member
+        <button className="btn-primary text-sm" onClick={() => { setSelected(null); setModalOpen(true); }}>
+          <Plus className="w-4 h-4" />
+          <span className="hidden sm:inline">Add Member</span>
+          <span className="sm:hidden">Add</span>
         </button>
       </div>
 
@@ -84,21 +81,12 @@ export default function MembersPage() {
         </div>
       )}
 
-      <div className="card p-4 flex flex-col sm:flex-row gap-3">
+      <div className="card p-3 sm:p-4 flex flex-col sm:flex-row gap-3">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-          <input
-            className="input pl-9"
-            placeholder="Search by name, email or phone..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
+          <input className="input pl-9" placeholder="Search by name, email or phone..." value={search} onChange={(e) => setSearch(e.target.value)} />
         </div>
-        <select
-          className="input sm:w-40"
-          value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value)}
-        >
+        <select className="input sm:w-40" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
           <option value="">All Status</option>
           <option value="active">Active</option>
           <option value="inactive">Inactive</option>
@@ -106,104 +94,92 @@ export default function MembersPage() {
       </div>
 
       <div className="card p-0 overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead className="bg-gray-50 border-b border-gray-100">
-              <tr>
-                <th className="text-left px-4 py-3 font-medium text-gray-600">Name</th>
-                <th className="text-left px-4 py-3 font-medium text-gray-600">Email</th>
-                <th className="text-left px-4 py-3 font-medium text-gray-600">Phone</th>
-                <th className="text-left px-4 py-3 font-medium text-gray-600">Services</th>
-                <th className="text-left px-4 py-3 font-medium text-gray-600">Membership End</th>
-                <th className="text-left px-4 py-3 font-medium text-gray-600">Status</th>
-                <th className="text-right px-4 py-3 font-medium text-gray-600">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-50">
-              {loading ? (
-                <tr>
-                  <td colSpan={7} className="text-center py-12 text-gray-400">
-                    Loading...
-                  </td>
-                </tr>
-              ) : members.length === 0 ? (
-                <tr>
-                  <td colSpan={7} className="text-center py-12 text-gray-400">
-                    No members found.
-                  </td>
-                </tr>
-              ) : (
-                members.map((m) => {
-                  const services = m.services as { _id: string; name: string }[];
-                  return (
-                    <tr key={m._id} className="hover:bg-gray-50 transition-colors">
-                      <td className="px-4 py-3 font-medium text-gray-900">{m.name}</td>
-                      <td className="px-4 py-3 text-gray-600">{m.email}</td>
-                      <td className="px-4 py-3 text-gray-600">{m.phone || '-'}</td>
-                      <td className="px-4 py-3">
-                        <div className="flex flex-wrap gap-1">
-                          {services.length === 0 ? (
-                            <span className="text-gray-400">None</span>
-                          ) : (
-                            services.slice(0, 2).map((s) => (
-                              <span
-                                key={s._id}
-                                className="px-2 py-0.5 bg-orange-100 text-orange-700 rounded-full text-xs"
-                              >
-                                {s.name}
-                              </span>
-                            ))
-                          )}
-                          {services.length > 2 && (
-                            <span className="px-2 py-0.5 bg-gray-100 text-gray-600 rounded-full text-xs">
-                              +{services.length - 2}
-                            </span>
-                          )}
-                        </div>
-                      </td>
-                      <td className="px-4 py-3 text-gray-600">
-                        {m.membershipEndDate
-                          ? new Date(m.membershipEndDate).toLocaleDateString()
-                          : '-'}
-                      </td>
-                      <td className="px-4 py-3">
-                        <span className={m.status === 'active' ? 'badge-active' : 'badge-inactive'}>
-                          {m.status}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3">
-                        <div className="flex items-center justify-end gap-2">
-                          <button
-                            onClick={() => { setSelected(m); setModalOpen(true); }}
-                            className="p-1.5 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                          >
-                            <Pencil className="w-4 h-4" />
-                          </button>
-                          <button
-                            onClick={() => setDeleteTarget(m)}
-                            className="p-1.5 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })
-              )}
-            </tbody>
-          </table>
-        </div>
+        {loading ? (
+          <div className="text-center py-12 text-gray-400 text-sm">Loading...</div>
+        ) : members.length === 0 ? (
+          <div className="text-center py-12 text-gray-400 text-sm">No members found.</div>
+        ) : (
+          <>
+            {/* Mobile cards */}
+            <div className="sm:hidden divide-y divide-gray-100">
+              {members.map((m) => {
+                const services = m.services as { _id: string; name: string }[];
+                return (
+                  <div key={m._id} className="flex items-start justify-between px-4 py-3 gap-3">
+                    <div className="min-w-0">
+                      <p className="font-medium text-gray-900 truncate">{m.name}</p>
+                      <p className="text-xs text-gray-500 truncate">{m.email}</p>
+                      {m.phone && <p className="text-xs text-gray-400 mt-0.5">{m.phone}</p>}
+                      <div className="flex flex-wrap items-center gap-1.5 mt-1.5">
+                        <span className={m.status === 'active' ? 'badge-active' : 'badge-inactive'}>{m.status}</span>
+                        {services.slice(0, 2).map((s) => (
+                          <span key={s._id} className="px-1.5 py-0.5 bg-orange-100 text-orange-700 rounded-full text-xs">{s.name}</span>
+                        ))}
+                        {services.length > 2 && <span className="text-xs text-gray-400">+{services.length - 2}</span>}
+                      </div>
+                    </div>
+                    <div className="flex gap-1 shrink-0 mt-0.5">
+                      <button onClick={() => openEdit(m)} className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"><Pencil className="w-4 h-4" /></button>
+                      <button onClick={() => setDeleteTarget(m)} className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"><Trash2 className="w-4 h-4" /></button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Desktop table */}
+            <div className="hidden sm:block overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead className="bg-gray-50 border-b border-gray-100">
+                  <tr>
+                    <th className="text-left px-4 py-3 font-medium text-gray-600">Name</th>
+                    <th className="text-left px-4 py-3 font-medium text-gray-600">Email</th>
+                    <th className="text-left px-4 py-3 font-medium text-gray-600">Phone</th>
+                    <th className="text-left px-4 py-3 font-medium text-gray-600">Services</th>
+                    <th className="text-left px-4 py-3 font-medium text-gray-600">Membership End</th>
+                    <th className="text-left px-4 py-3 font-medium text-gray-600">Status</th>
+                    <th className="text-right px-4 py-3 font-medium text-gray-600">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-50">
+                  {members.map((m) => {
+                    const services = m.services as { _id: string; name: string }[];
+                    return (
+                      <tr key={m._id} className="hover:bg-gray-50 transition-colors">
+                        <td className="px-4 py-3 font-medium text-gray-900">{m.name}</td>
+                        <td className="px-4 py-3 text-gray-600">{m.email}</td>
+                        <td className="px-4 py-3 text-gray-600">{m.phone || '-'}</td>
+                        <td className="px-4 py-3">
+                          <div className="flex flex-wrap gap-1">
+                            {services.length === 0 ? <span className="text-gray-400">None</span> : (
+                              <>
+                                {services.slice(0, 2).map((s) => (
+                                  <span key={s._id} className="px-2 py-0.5 bg-orange-100 text-orange-700 rounded-full text-xs">{s.name}</span>
+                                ))}
+                                {services.length > 2 && <span className="px-2 py-0.5 bg-gray-100 text-gray-600 rounded-full text-xs">+{services.length - 2}</span>}
+                              </>
+                            )}
+                          </div>
+                        </td>
+                        <td className="px-4 py-3 text-gray-600">{m.membershipEndDate ? new Date(m.membershipEndDate).toLocaleDateString() : '-'}</td>
+                        <td className="px-4 py-3"><span className={m.status === 'active' ? 'badge-active' : 'badge-inactive'}>{m.status}</span></td>
+                        <td className="px-4 py-3">
+                          <div className="flex items-center justify-end gap-2">
+                            <button onClick={() => openEdit(m)} className="p-1.5 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"><Pencil className="w-4 h-4" /></button>
+                            <button onClick={() => setDeleteTarget(m)} className="p-1.5 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"><Trash2 className="w-4 h-4" /></button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </>
+        )}
       </div>
 
-      {modalOpen && (
-        <MemberModal
-          member={selected}
-          onClose={() => setModalOpen(false)}
-          onSaved={handleSaved}
-        />
-      )}
-
+      {modalOpen && <MemberModal member={selected} onClose={() => setModalOpen(false)} onSaved={handleSaved} />}
       {deleteTarget && (
         <ConfirmDialog
           title="Delete Member"

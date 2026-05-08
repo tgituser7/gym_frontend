@@ -41,7 +41,7 @@ export default function DashboardPage() {
     api.stats
       .get()
       .then(setStats)
-      .catch(() => setError('Failed to load dashboard stats'))
+      .catch((err: unknown) => setError(err instanceof Error ? err.message : 'Failed to load dashboard stats'))
       .finally(() => setLoading(false));
   }, []);
 
@@ -92,7 +92,7 @@ export default function DashboardPage() {
         <StatCard
           title="Monthly Revenue"
           value={`₹${stats!.monthlyRevenue.toLocaleString()}`}
-          sub={`₹${stats!.pendingAmount.toLocaleString()} pending`}
+          sub={`₹${stats!.pendingAmount.toLocaleString()} due`}
           icon={TrendingUp}
           color="bg-green-500"
         />
@@ -127,7 +127,7 @@ export default function DashboardPage() {
             <Clock className="w-4 h-4 text-orange-500" /> Upcoming / Overdue Fees
           </h3>
           {stats!.upcomingDues.length === 0 ? (
-            <p className="text-gray-400 text-sm">No pending fees.</p>
+            <p className="text-gray-400 text-sm">No due fees.</p>
           ) : (
             <div className="space-y-3">
               {stats!.upcomingDues.map((f) => {
@@ -145,7 +145,7 @@ export default function DashboardPage() {
                         ₹{f.amount.toLocaleString()}
                       </p>
                       <span className={f.status === 'overdue' ? 'badge-overdue' : 'badge-pending'}>
-                        {f.status}
+                        {f.status === 'pending' ? 'Due' : f.status === 'overdue' ? 'Overdue' : 'Paid'}
                       </span>
                     </div>
                   </div>

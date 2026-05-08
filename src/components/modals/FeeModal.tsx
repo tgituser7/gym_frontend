@@ -85,7 +85,7 @@ export default function FeeModal({ fee, onClose, onSaved }: Props) {
           <div>
             <label className="label">Status</label>
             <select className="input" value={form.status} onChange={(e) => set('status', e.target.value)}>
-              <option value="pending">Pending</option>
+              <option value="pending">Due</option>
               <option value="paid">Paid</option>
               <option value="overdue">Overdue</option>
             </select>
