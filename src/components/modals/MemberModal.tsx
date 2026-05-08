@@ -48,7 +48,7 @@ export default function MemberModal({ member, onClose, onSaved }: Props) {
     if (member) {
       const svcIds = (member.services as Service[]).map((s) => (typeof s === 'string' ? s : s._id));
       setForm({
-        name: member.name, email: member.email,
+        name: member.name, email: member.email || '',
         phone: member.phone || '', address: member.address || '',
         dateOfBirth: member.dateOfBirth ? member.dateOfBirth.split('T')[0] : '',
         gender: member.gender || '',
