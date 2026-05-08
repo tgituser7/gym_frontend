@@ -7,7 +7,7 @@ import { Service, Staff } from '@/types';
 import ServiceModal from '@/components/modals/ServiceModal';
 import ConfirmDialog from '@/components/ConfirmDialog';
 
-const CATEGORIES = ['Yoga', 'Cardio', 'Strength', 'Pilates', 'Swimming', 'CrossFit', 'Martial Arts', 'Dance', 'Nutrition', 'Other'];
+const CATEGORIES = ['Yoga', 'Cardio', 'Strength', 'Pilates', 'Swimming', 'Martial Arts', 'Dance', 'Nutrition', 'Other'];
 
 export default function ServicesPage() {
   const [services, setServices] = useState<Service[]>([]);

@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { Users, UserCheck, Dumbbell, TrendingUp, AlertCircle, Clock } from 'lucide-react';
 import { api } from '@/lib/api';
 import { DashboardStats } from '@/types';
+import { formatDate } from '@/lib/dates';
 
 function StatCard({
   title,
@@ -137,7 +138,7 @@ export default function DashboardPage() {
                     <div>
                       <p className="text-sm font-medium text-gray-900">{member?.name ?? 'Unknown'}</p>
                       <p className="text-xs text-gray-400">
-                        Due: {new Date(f.dueDate).toLocaleDateString()}
+                        Due: {formatDate(f.dueDate)}
                       </p>
                     </div>
                     <div className="text-right">

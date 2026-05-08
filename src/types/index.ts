@@ -56,7 +56,7 @@ export interface Service {
   price: number;
   duration?: number;
   instructor?: Staff | string;
-  category: 'Yoga' | 'Cardio' | 'Strength' | 'Pilates' | 'Swimming' | 'CrossFit' | 'Martial Arts' | 'Dance' | 'Nutrition' | 'Other';
+  category: 'Yoga' | 'Cardio' | 'Strength' | 'Pilates' | 'Swimming' | 'Martial Arts' | 'Dance' | 'Nutrition' | 'Other';
   schedule?: string;
   maxCapacity?: number;
   status: 'active' | 'inactive';

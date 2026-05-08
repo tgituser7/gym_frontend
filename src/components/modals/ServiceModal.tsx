@@ -7,7 +7,7 @@ import ModalShell from '../ModalShell';
 
 interface Props { service: Service | null; onClose: () => void; onSaved: (service: Service) => void; }
 
-const CATEGORIES = ['Yoga', 'Cardio', 'Strength', 'Pilates', 'Swimming', 'CrossFit', 'Martial Arts', 'Dance', 'Nutrition', 'Other'] as const;
+const CATEGORIES = ['Yoga', 'Cardio', 'Strength', 'Pilates', 'Swimming', 'Martial Arts', 'Dance', 'Nutrition', 'Other'] as const;
 const FORM_ID = 'service-form';
 
 const EMPTY = {

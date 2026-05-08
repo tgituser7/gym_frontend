@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { Plus, Pencil, Trash2, AlertCircle, CheckCircle, Clock, XCircle } from 'lucide-react';
 import { api } from '@/lib/api';
 import { Fee, Member } from '@/types';
+import { formatDate } from '@/lib/dates';
 import FeeModal from '@/components/modals/FeeModal';
 import ConfirmDialog from '@/components/ConfirmDialog';
 
@@ -152,7 +153,7 @@ export default function FeesPage() {
                         <span className="text-sm font-semibold text-gray-900">₹{f.amount.toLocaleString()}</span>
                       </div>
                       <p className="text-xs text-gray-400 mt-0.5">
-                        Due {new Date(f.dueDate).toLocaleDateString()}
+                        Due {formatDate(f.dueDate)}
                         {f.description ? ` · ${f.description}` : ''}
                       </p>
                     </div>
@@ -191,8 +192,8 @@ export default function FeesPage() {
                         </td>
                         <td className="px-4 py-3 text-gray-600 max-w-xs truncate">{f.description || '-'}</td>
                         <td className="px-4 py-3 font-semibold text-gray-900">₹{f.amount.toLocaleString()}</td>
-                        <td className="px-4 py-3 text-gray-600">{new Date(f.dueDate).toLocaleDateString()}</td>
-                        <td className="px-4 py-3 text-gray-600">{f.paymentDate ? new Date(f.paymentDate).toLocaleDateString() : '-'}</td>
+                        <td className="px-4 py-3 text-gray-600">{formatDate(f.dueDate)}</td>
+                        <td className="px-4 py-3 text-gray-600">{f.paymentDate ? formatDate(f.paymentDate) : '-'}</td>
                         <td className="px-4 py-3 text-gray-600 capitalize">{f.paymentMethod || '-'}</td>
                         <td className="px-4 py-3">
                           <div className="flex items-center gap-1.5">

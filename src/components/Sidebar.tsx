@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
   LayoutDashboard, Users, UserCheck, Dumbbell,
-  DollarSign, Zap, LogOut, X,
+  DollarSign, Zap, LogOut, X, Bell,
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { Gym } from '@/types';
@@ -15,6 +15,7 @@ const navItems = [
   { href: '/staff', label: 'Staff', icon: UserCheck },
   { href: '/services', label: 'Services', icon: Dumbbell },
   { href: '/fees', label: 'Fees', icon: DollarSign },
+  { href: '/renewals', label: 'Renewals', icon: Bell },
   // { href: '/branches', label: 'Branches', icon: GitBranch },
 ];
 

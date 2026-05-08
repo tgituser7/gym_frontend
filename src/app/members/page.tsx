@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { Plus, Search, Pencil, Trash2, AlertCircle } from 'lucide-react';
 import { api } from '@/lib/api';
 import { Member } from '@/types';
+import { formatDate } from '@/lib/dates';
 import MemberModal from '@/components/modals/MemberModal';
 import ConfirmDialog from '@/components/ConfirmDialog';
 
@@ -161,7 +162,7 @@ export default function MembersPage() {
                             )}
                           </div>
                         </td>
-                        <td className="px-4 py-3 text-gray-600">{m.membershipEndDate ? new Date(m.membershipEndDate).toLocaleDateString() : '-'}</td>
+                        <td className="px-4 py-3 text-gray-600">{m.membershipEndDate ? formatDate(m.membershipEndDate) : '-'}</td>
                         <td className="px-4 py-3"><span className={m.status === 'active' ? 'badge-active' : 'badge-inactive'}>{m.status}</span></td>
                         <td className="px-4 py-3">
                           <div className="flex items-center justify-end gap-2">

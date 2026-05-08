@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { api } from '@/lib/api';
 import { Staff, Service } from '@/types';
+import { todayInputDate, isoToInputDate, inputDateToISO } from '@/lib/dates';
 import ModalShell from '../ModalShell';
 
 interface Props { staff: Staff | null; onClose: () => void; onSaved: (staff: Staff) => void; }
@@ -14,7 +15,7 @@ const EMPTY = {
   name: '', email: '', phone: '',
   role: 'Trainer' as Staff['role'],
   specialization: '', salary: '' as number | string,
-  joinDate: new Date().toISOString().split('T')[0],
+  joinDate: todayInputDate(),
   status: 'active' as Staff['status'], notes: '',
 };
 
@@ -24,7 +25,6 @@ const CATEGORY_COLORS: Record<string, string> = {
   Strength: 'bg-blue-100 text-blue-700',
   Pilates: 'bg-pink-100 text-pink-700',
   Swimming: 'bg-cyan-100 text-cyan-700',
-  CrossFit: 'bg-orange-100 text-orange-700',
   'Martial Arts': 'bg-yellow-100 text-yellow-700',
   Dance: 'bg-fuchsia-100 text-fuchsia-700',
   Nutrition: 'bg-green-100 text-green-700',
@@ -41,7 +41,7 @@ export default function StaffModal({ staff, onClose, onSaved }: Props) {
     setForm(staff ? {
       name: staff.name, email: staff.email, phone: staff.phone || '',
       role: staff.role, specialization: staff.specialization || '',
-      salary: staff.salary ?? '', joinDate: staff.joinDate.split('T')[0],
+      salary: staff.salary ?? '', joinDate: isoToInputDate(staff.joinDate),
       status: staff.status, notes: staff.notes || '',
     } : { ...EMPTY });
 
@@ -64,7 +64,7 @@ export default function StaffModal({ staff, onClose, onSaved }: Props) {
     e.preventDefault();
     setLoading(true); setError('');
     try {
-      const payload = { ...form, salary: form.salary !== '' ? Number(form.salary) : undefined };
+      const payload = { ...form, salary: form.salary !== '' ? Number(form.salary) : undefined, joinDate: inputDateToISO(form.joinDate) };
       const saved = staff ? await api.staff.update(staff._id, payload) : await api.staff.create(payload);
       onSaved(saved);
     } catch (err: unknown) {

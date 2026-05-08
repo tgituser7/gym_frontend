@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { api } from '@/lib/api';
 import { Member, Service, Fee } from '@/types';
+import { todayInputDate, isoToInputDate, inputDateToISO, formatDate } from '@/lib/dates';
 import ModalShell from '../ModalShell';
 
 interface Props {
@@ -16,7 +17,7 @@ const FORM_ID = 'member-form';
 const EMPTY = {
   name: '', email: '', phone: '', address: '',
   dateOfBirth: '', gender: '' as Member['gender'] | '',
-  membershipStartDate: new Date().toISOString().split('T')[0],
+  membershipStartDate: todayInputDate(),
   membershipEndDate: '',
   services: [] as string[],
   status: 'active' as Member['status'],
@@ -50,10 +51,10 @@ export default function MemberModal({ member, onClose, onSaved }: Props) {
       setForm({
         name: member.name, email: member.email || '',
         phone: member.phone || '', address: member.address || '',
-        dateOfBirth: member.dateOfBirth ? member.dateOfBirth.split('T')[0] : '',
+        dateOfBirth: member.dateOfBirth ? isoToInputDate(member.dateOfBirth) : '',
         gender: member.gender || '',
-        membershipStartDate: member.membershipStartDate.split('T')[0],
-        membershipEndDate: member.membershipEndDate ? member.membershipEndDate.split('T')[0] : '',
+        membershipStartDate: isoToInputDate(member.membershipStartDate),
+        membershipEndDate: member.membershipEndDate ? isoToInputDate(member.membershipEndDate) : '',
         services: svcIds, status: member.status,
         emergencyContact: member.emergencyContact || '', notes: member.notes || '',
       });
@@ -82,8 +83,9 @@ export default function MemberModal({ member, onClose, onSaved }: Props) {
         ...form,
         email: form.email || undefined,
         gender: form.gender || undefined,
-        dateOfBirth: form.dateOfBirth || undefined,
-        membershipEndDate: form.membershipEndDate || undefined,
+        dateOfBirth: form.dateOfBirth ? inputDateToISO(form.dateOfBirth) : undefined,
+        membershipStartDate: inputDateToISO(form.membershipStartDate),
+        membershipEndDate: form.membershipEndDate ? inputDateToISO(form.membershipEndDate) : undefined,
       };
       const saved = member ? await api.members.update(member._id, payload) : await api.members.create(payload);
       onSaved(saved);
@@ -165,7 +167,7 @@ export default function MemberModal({ member, onClose, onSaved }: Props) {
                 <div key={f._id} className="flex items-center justify-between px-3 py-2 bg-gray-50 rounded-lg">
                   <div>
                     <p className="text-sm font-medium text-gray-900">₹{f.amount.toLocaleString()}</p>
-                    <p className="text-xs text-gray-500">{f.description || 'Fee'} · Due {new Date(f.dueDate).toLocaleDateString()}</p>
+                    <p className="text-xs text-gray-500">{f.description || 'Fee'} · Due {formatDate(f.dueDate)}</p>
                   </div>
                   <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${STATUS_STYLES[f.status]}`}>
                     {STATUS_LABELS[f.status] ?? f.status}

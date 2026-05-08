@@ -62,6 +62,10 @@ export const api = {
     list: (params?: { search?: string; status?: string }) =>
       request<Member[]>(`/members${buildQuery(params ?? {})}`),
     get: (id: string) => request<Member>(`/members/${id}`),
+    renewals: (params?: { days?: number; page?: number; limit?: number }) =>
+      request<{ members: Member[]; total: number; page: number; pages: number }>(
+        `/members/renewals${buildQuery({ days: params?.days?.toString(), page: params?.page?.toString(), limit: params?.limit?.toString() })}`
+      ),
     create: (data: Partial<Member>) =>
       request<Member>('/members', { method: 'POST', body: JSON.stringify(data) }),
     update: (id: string, data: Partial<Member>) =>

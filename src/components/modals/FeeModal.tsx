@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { api } from '@/lib/api';
 import { Fee, Member, Service } from '@/types';
+import { todayInputDate, isoToInputDate, inputDateToISO } from '@/lib/dates';
 import ModalShell from '../ModalShell';
 
 interface Props { fee: Fee | null; onClose: () => void; onSaved: (fee: Fee) => void; }
@@ -11,7 +12,7 @@ const FORM_ID = 'fee-form';
 
 const EMPTY = {
   member: '', amount: '' as number | string, description: '',
-  dueDate: new Date().toISOString().split('T')[0], paymentDate: '',
+  dueDate: todayInputDate(), paymentDate: '',
   status: 'pending' as Fee['status'],
   paymentMethod: '' as Fee['paymentMethod'] | '',
   services: [] as string[],
@@ -36,8 +37,8 @@ export default function FeeModal({ fee, onClose, onSaved }: Props) {
       const svcIds = ((fee.services || []) as Service[]).map((s) => (typeof s === 'string' ? s : s._id));
       setForm({
         member: memberId, amount: fee.amount, description: fee.description || '',
-        dueDate: fee.dueDate.split('T')[0],
-        paymentDate: fee.paymentDate ? fee.paymentDate.split('T')[0] : '',
+        dueDate: isoToInputDate(fee.dueDate),
+        paymentDate: fee.paymentDate ? isoToInputDate(fee.paymentDate) : '',
         status: fee.status, paymentMethod: fee.paymentMethod || '', services: svcIds,
       });
     } else {
@@ -59,7 +60,8 @@ export default function FeeModal({ fee, onClose, onSaved }: Props) {
     try {
       const payload = {
         ...form, amount: Number(form.amount),
-        paymentDate: form.paymentDate || undefined,
+        dueDate: inputDateToISO(form.dueDate),
+        paymentDate: form.paymentDate ? inputDateToISO(form.paymentDate) : undefined,
         paymentMethod: form.paymentMethod || undefined,
       };
       const saved = fee ? await api.fees.update(fee._id, payload) : await api.fees.create(payload);
