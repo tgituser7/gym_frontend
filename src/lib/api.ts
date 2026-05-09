@@ -67,7 +67,7 @@ export const api = {
       ),
     get: (id: string) => request<Member>(`/members/${id}`),
     renewals: (params?: { days?: number; page?: number; limit?: number }) =>
-      request<{ members: Member[]; total: number; page: number; pages: number }>(
+      request<{ members: Member[]; total: number; page: number; pages: number; summary: { days3: number; days7: number; days14: number; days30: number; total: number } }>(
         `/members/renewals${buildQuery({ days: params?.days?.toString(), page: params?.page?.toString(), limit: params?.limit?.toString() })}`
       ),
     create: (data: Partial<Member>) =>

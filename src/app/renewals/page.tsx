@@ -8,19 +8,36 @@ import { Member, Service, Gym } from '@/types';
 import { formatDate } from '@/lib/dates';
 import { useAuth } from '@/context/AuthContext';
 
-const DAYS_OPTIONS = [3, 7, 14, 30];
 const PAGE_LIMIT = 20;
+
+// days=0 means "all" (no upper bound)
+const WINDOWS = [
+  { label: '3 days', days: 3, key: 'days3' as const },
+  { label: '7 days', days: 7, key: 'days7' as const },
+  { label: '14 days', days: 14, key: 'days14' as const },
+  { label: '30 days', days: 30, key: 'days30' as const },
+  { label: 'All', days: 0, key: 'total' as const },
+];
+
+type Summary = { days3: number; days7: number; days14: number; days30: number; total: number };
 
 function daysUntil(iso: string): number {
   return Math.ceil(
-    DateTime.fromISO(iso, { zone: 'utc' }).diff(DateTime.now().toUTC(), 'days').days
+    DateTime.fromISO(iso, { zone: 'utc' }).diff(DateTime.now().toUTC().startOf('day'), 'days').days
   );
 }
 
-function urgencyClass(days: number): string {
-  if (days <= 2) return 'bg-red-100 text-red-700';
-  if (days <= 7) return 'bg-yellow-100 text-yellow-700';
+function urgencyClass(d: number): string {
+  if (d < 0) return 'bg-red-100 text-red-700';
+  if (d <= 2) return 'bg-red-100 text-red-700';
+  if (d <= 7) return 'bg-yellow-100 text-yellow-700';
   return 'bg-blue-100 text-blue-700';
+}
+
+function daysLabel(d: number): string {
+  if (d < 0) return `${Math.abs(d)}d overdue`;
+  if (d === 0) return 'Today';
+  return `${d}d left`;
 }
 
 function buildWhatsAppLink(
@@ -51,6 +68,7 @@ export default function RenewalsPage() {
   const [total, setTotal] = useState(0);
   const [pages, setPages] = useState(1);
   const [page, setPage] = useState(1);
+  const [summary, setSummary] = useState<Summary>({ days3: 0, days7: 0, days14: 0, days30: 0, total: 0 });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [days, setDays] = useState(7);
@@ -62,6 +80,7 @@ export default function RenewalsPage() {
       setMembers(res.members);
       setTotal(res.total);
       setPages(res.pages);
+      setSummary(res.summary);
     } catch {
       setError('Failed to load renewal data');
     } finally { setLoading(false); }
@@ -69,8 +88,7 @@ export default function RenewalsPage() {
 
   useEffect(() => { fetchRenewals(); }, [fetchRenewals]);
 
-  // Reset to page 1 when days filter changes
-  const handleDaysChange = (d: number) => { setDays(d); setPage(1); };
+  const handleWindowChange = (d: number) => { setDays(d); setPage(1); };
 
   const gymName = branch ? ((branch.gym as Gym)?.name ?? branch.name) : 'our gym';
   const branchName = branch?.name || 'our gym';
@@ -80,22 +98,11 @@ export default function RenewalsPage() {
 
   return (
     <div className="space-y-5">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-xl sm:text-2xl font-bold text-gray-900">Renewals</h2>
-          <p className="text-gray-500 text-sm mt-0.5">
-            {total} member{total !== 1 ? 's' : ''} expiring within {days} days
-          </p>
-        </div>
-        <select
-          className="input w-auto text-sm"
-          value={days}
-          onChange={(e) => handleDaysChange(Number(e.target.value))}
-        >
-          {DAYS_OPTIONS.map((d) => (
-            <option key={d} value={d}>Next {d} days</option>
-          ))}
-        </select>
+      <div>
+        <h2 className="text-xl sm:text-2xl font-bold text-gray-900">Renewals</h2>
+        <p className="text-gray-500 text-sm mt-0.5">
+          {total} member{total !== 1 ? 's' : ''} {days === 0 ? 'pending renewal' : `expiring within ${days} days`}
+        </p>
       </div>
 
       {error && (
@@ -104,13 +111,39 @@ export default function RenewalsPage() {
         </div>
       )}
 
+      {/* Window selector stat cards */}
+      <div className="grid grid-cols-3 sm:grid-cols-5 gap-2 sm:gap-3">
+        {WINDOWS.map((w) => {
+          const count = summary[w.key];
+          const isActive = days === w.days;
+          return (
+            <button
+              key={w.days}
+              onClick={() => handleWindowChange(w.days)}
+              className={`card p-3 text-left transition-all ${
+                isActive
+                  ? 'ring-2 ring-orange-500 bg-orange-50'
+                  : 'hover:shadow-md'
+              }`}
+            >
+              <p className={`text-xl sm:text-2xl font-bold ${isActive ? 'text-orange-600' : 'text-gray-900'}`}>
+                {loading ? '–' : count}
+              </p>
+              <p className={`text-xs mt-0.5 ${isActive ? 'text-orange-500' : 'text-gray-500'}`}>
+                {w.label}
+              </p>
+            </button>
+          );
+        })}
+      </div>
+
       <div className="card p-0 overflow-hidden">
         {loading ? (
           <div className="text-center py-12 text-gray-400 text-sm">Loading...</div>
         ) : members.length === 0 ? (
           <div className="flex flex-col items-center py-12 text-gray-400 gap-2">
             <Bell className="w-8 h-8" />
-            <p className="text-sm">No memberships expiring in the next {days} days.</p>
+            <p className="text-sm">No memberships pending renewal in this window.</p>
           </div>
         ) : (
           <>
@@ -127,7 +160,7 @@ export default function RenewalsPage() {
                         <div className="flex items-center gap-2 flex-wrap">
                           <p className="font-medium text-gray-900">{m.name}</p>
                           <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${urgencyClass(d)}`}>
-                            {d <= 0 ? 'Today' : `${d}d left`}
+                            {daysLabel(d)}
                           </span>
                         </div>
                         {m.phone && (
@@ -173,7 +206,7 @@ export default function RenewalsPage() {
                     <th className="text-left px-4 py-3 font-medium text-gray-600">Phone</th>
                     <th className="text-left px-4 py-3 font-medium text-gray-600">Services</th>
                     <th className="text-left px-4 py-3 font-medium text-gray-600">Expires</th>
-                    <th className="text-left px-4 py-3 font-medium text-gray-600">Days Left</th>
+                    <th className="text-left px-4 py-3 font-medium text-gray-600">Status</th>
                     <th className="text-right px-4 py-3 font-medium text-gray-600">Actions</th>
                   </tr>
                 </thead>
@@ -208,7 +241,7 @@ export default function RenewalsPage() {
                         <td className="px-4 py-3 text-gray-600">{expiry}</td>
                         <td className="px-4 py-3">
                           <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${urgencyClass(d)}`}>
-                            {d <= 0 ? 'Today' : `${d} day${d === 1 ? '' : 's'}`}
+                            {daysLabel(d)}
                           </span>
                         </td>
                         <td className="px-4 py-3">
@@ -238,9 +271,9 @@ export default function RenewalsPage() {
             </div>
 
             {/* Pagination */}
-            {pages > 1 && (
-              <div className="flex items-center justify-between px-4 py-3 border-t border-gray-100">
-                <p className="text-xs text-gray-500">{from}–{to} of {total}</p>
+            <div className="flex items-center justify-between px-4 py-3 border-t border-gray-100">
+              <p className="text-xs text-gray-500">{from}–{to} of {total}</p>
+              {pages > 1 && (
                 <div className="flex items-center gap-1">
                   <button
                     onClick={() => setPage((p) => p - 1)}
@@ -249,9 +282,7 @@ export default function RenewalsPage() {
                   >
                     <ChevronLeft className="w-4 h-4" />
                   </button>
-                  <span className="text-sm text-gray-700 px-2">
-                    {page} / {pages}
-                  </span>
+                  <span className="text-sm text-gray-700 px-2">{page} / {pages}</span>
                   <button
                     onClick={() => setPage((p) => p + 1)}
                     disabled={page === pages}
@@ -260,8 +291,8 @@ export default function RenewalsPage() {
                     <ChevronRight className="w-4 h-4" />
                   </button>
                 </div>
-              </div>
-            )}
+              )}
+            </div>
           </>
         )}
       </div>
