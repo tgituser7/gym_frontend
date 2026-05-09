@@ -1,15 +1,21 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
-import { Plus, Search, Pencil, Trash2, AlertCircle } from 'lucide-react';
+import { Plus, Search, Pencil, Trash2, AlertCircle, ChevronLeft, ChevronRight } from 'lucide-react';
 import { api } from '@/lib/api';
 import { Member } from '@/types';
 import { formatDate } from '@/lib/dates';
 import MemberModal from '@/components/modals/MemberModal';
 import ConfirmDialog from '@/components/ConfirmDialog';
 
+const PAGE_SIZE_OPTIONS = [10, 50, 100, 500];
+
 export default function MembersPage() {
   const [members, setMembers] = useState<Member[]>([]);
+  const [total, setTotal] = useState(0);
+  const [pages, setPages] = useState(1);
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(10);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [search, setSearch] = useState('');
@@ -23,27 +29,34 @@ export default function MembersPage() {
     setLoading(true);
     setError('');
     try {
-      const data = await api.members.list({ search, status: statusFilter });
-      setMembers(data);
+      const res = await api.members.listPaged({ search, status: statusFilter, page, limit });
+      setMembers(res.members);
+      setTotal(res.total);
+      setPages(res.pages);
     } catch {
       setError('Failed to load members');
     } finally {
       setLoading(false);
     }
-  }, [search, statusFilter]);
+  }, [search, statusFilter, page, limit]);
 
   useEffect(() => {
     const t = setTimeout(fetchMembers, 300);
     return () => clearTimeout(t);
   }, [fetchMembers]);
 
+  const handleSearchChange = (val: string) => { setSearch(val); setPage(1); };
+  const handleStatusFilter = (s: string) => { setStatusFilter(s); setPage(1); };
+  const handleLimitChange = (l: number) => { setLimit(l); setPage(1); };
+
   const handleDelete = async () => {
     if (!deleteTarget) return;
     setDeleteLoading(true);
     try {
       await api.members.delete(deleteTarget._id);
-      setMembers((prev) => prev.filter((m) => m._id !== deleteTarget._id));
       setDeleteTarget(null);
+      const newPage = members.length === 1 && page > 1 ? page - 1 : page;
+      if (newPage !== page) setPage(newPage); else fetchMembers();
     } catch {
       setError('Failed to delete member');
     } finally {
@@ -51,23 +64,18 @@ export default function MembersPage() {
     }
   };
 
-  const handleSaved = (member: Member) => {
-    setMembers((prev) => {
-      const idx = prev.findIndex((m) => m._id === member._id);
-      if (idx >= 0) { const next = [...prev]; next[idx] = member; return next; }
-      return [member, ...prev];
-    });
-    setModalOpen(false);
-  };
-
+  const handleSaved = () => { setModalOpen(false); fetchMembers(); };
   const openEdit = (m: Member) => { setSelected(m); setModalOpen(true); };
+
+  const from = total === 0 ? 0 : (page - 1) * limit + 1;
+  const to = Math.min(page * limit, total);
 
   return (
     <div className="space-y-5">
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-xl sm:text-2xl font-bold text-gray-900">Members</h2>
-          <p className="text-gray-500 text-sm mt-0.5">{members.length} total members</p>
+          <p className="text-gray-500 text-sm mt-0.5">{total} total members</p>
         </div>
         <button className="btn-primary text-sm" onClick={() => { setSelected(null); setModalOpen(true); }}>
           <Plus className="w-4 h-4" />
@@ -82,16 +90,35 @@ export default function MembersPage() {
         </div>
       )}
 
-      <div className="card p-3 sm:p-4 flex flex-col sm:flex-row gap-3">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-          <input className="input pl-9" placeholder="Search by name, email or phone..." value={search} onChange={(e) => setSearch(e.target.value)} />
+      <div className="card p-3 sm:p-4 flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
+        <div className="flex flex-col sm:flex-row gap-3 flex-1 w-full sm:w-auto">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <input className="input pl-9" placeholder="Search by name, email or phone..." value={search} onChange={(e) => handleSearchChange(e.target.value)} />
+          </div>
+          <select className="input sm:w-40" value={statusFilter} onChange={(e) => handleStatusFilter(e.target.value)}>
+            <option value="">All Status</option>
+            <option value="active">Active</option>
+            <option value="inactive">Inactive</option>
+          </select>
         </div>
-        <select className="input sm:w-40" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
-          <option value="">All Status</option>
-          <option value="active">Active</option>
-          <option value="inactive">Inactive</option>
-        </select>
+        <div className="flex items-center gap-2 text-sm text-gray-500 shrink-0">
+          <span className="hidden sm:inline">Show</span>
+          <div className="flex gap-1">
+            {PAGE_SIZE_OPTIONS.map((n) => (
+              <button
+                key={n}
+                onClick={() => handleLimitChange(n)}
+                className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-colors ${
+                  limit === n ? 'bg-orange-500 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                }`}
+              >
+                {n}
+              </button>
+            ))}
+          </div>
+          <span className="hidden sm:inline">per page</span>
+        </div>
       </div>
 
       <div className="card p-0 overflow-hidden">
@@ -175,6 +202,30 @@ export default function MembersPage() {
                   })}
                 </tbody>
               </table>
+            </div>
+
+            {/* Pagination */}
+            <div className="flex items-center justify-between px-4 py-3 border-t border-gray-100">
+              <p className="text-xs text-gray-500">{from}–{to} of {total}</p>
+              {pages > 1 && (
+                <div className="flex items-center gap-1">
+                  <button
+                    onClick={() => setPage((p) => p - 1)}
+                    disabled={page === 1}
+                    className="p-1.5 rounded-lg text-gray-500 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                  </button>
+                  <span className="text-sm text-gray-700 px-2">{page} / {pages}</span>
+                  <button
+                    onClick={() => setPage((p) => p + 1)}
+                    disabled={page === pages}
+                    className="p-1.5 rounded-lg text-gray-500 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                  >
+                    <ChevronRight className="w-4 h-4" />
+                  </button>
+                </div>
+              )}
             </div>
           </>
         )}

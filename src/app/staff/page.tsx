@@ -1,16 +1,21 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
-import { Plus, Search, Pencil, Trash2, AlertCircle } from 'lucide-react';
+import { Plus, Search, Pencil, Trash2, AlertCircle, ChevronLeft, ChevronRight } from 'lucide-react';
 import { api } from '@/lib/api';
 import { Staff } from '@/types';
 import StaffModal from '@/components/modals/StaffModal';
 import ConfirmDialog from '@/components/ConfirmDialog';
 
 const ROLES = ['Trainer', 'Instructor', 'Manager', 'Receptionist', 'Maintenance', 'Nutritionist', 'Other'];
+const PAGE_SIZE_OPTIONS = [10, 50, 100, 500];
 
 export default function StaffPage() {
   const [staff, setStaff] = useState<Staff[]>([]);
+  const [total, setTotal] = useState(0);
+  const [pages, setPages] = useState(1);
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(10);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [search, setSearch] = useState('');
@@ -24,27 +29,34 @@ export default function StaffPage() {
     setLoading(true);
     setError('');
     try {
-      const data = await api.staff.list({ search, role: roleFilter });
-      setStaff(data);
+      const res = await api.staff.listPaged({ search, role: roleFilter, page, limit });
+      setStaff(res.staff);
+      setTotal(res.total);
+      setPages(res.pages);
     } catch {
       setError('Failed to load staff');
     } finally {
       setLoading(false);
     }
-  }, [search, roleFilter]);
+  }, [search, roleFilter, page, limit]);
 
   useEffect(() => {
     const t = setTimeout(fetchStaff, 300);
     return () => clearTimeout(t);
   }, [fetchStaff]);
 
+  const handleSearchChange = (val: string) => { setSearch(val); setPage(1); };
+  const handleRoleFilter = (r: string) => { setRoleFilter(r); setPage(1); };
+  const handleLimitChange = (l: number) => { setLimit(l); setPage(1); };
+
   const handleDelete = async () => {
     if (!deleteTarget) return;
     setDeleteLoading(true);
     try {
       await api.staff.delete(deleteTarget._id);
-      setStaff((prev) => prev.filter((s) => s._id !== deleteTarget._id));
       setDeleteTarget(null);
+      const newPage = staff.length === 1 && page > 1 ? page - 1 : page;
+      if (newPage !== page) setPage(newPage); else fetchStaff();
     } catch {
       setError('Failed to delete staff member');
     } finally {
@@ -52,23 +64,18 @@ export default function StaffPage() {
     }
   };
 
-  const handleSaved = (item: Staff) => {
-    setStaff((prev) => {
-      const idx = prev.findIndex((s) => s._id === item._id);
-      if (idx >= 0) { const next = [...prev]; next[idx] = item; return next; }
-      return [item, ...prev];
-    });
-    setModalOpen(false);
-  };
-
+  const handleSaved = () => { setModalOpen(false); fetchStaff(); };
   const openEdit = (s: Staff) => { setSelected(s); setModalOpen(true); };
+
+  const from = total === 0 ? 0 : (page - 1) * limit + 1;
+  const to = Math.min(page * limit, total);
 
   return (
     <div className="space-y-5">
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-xl sm:text-2xl font-bold text-gray-900">Staff</h2>
-          <p className="text-gray-500 text-sm mt-0.5">{staff.length} staff members</p>
+          <p className="text-gray-500 text-sm mt-0.5">{total} staff members</p>
         </div>
         <button className="btn-primary text-sm" onClick={() => { setSelected(null); setModalOpen(true); }}>
           <Plus className="w-4 h-4" />
@@ -83,15 +90,34 @@ export default function StaffPage() {
         </div>
       )}
 
-      <div className="card p-3 sm:p-4 flex flex-col sm:flex-row gap-3">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-          <input className="input pl-9" placeholder="Search by name, email or specialization..." value={search} onChange={(e) => setSearch(e.target.value)} />
+      <div className="card p-3 sm:p-4 flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
+        <div className="flex flex-col sm:flex-row gap-3 flex-1 w-full sm:w-auto">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <input className="input pl-9" placeholder="Search by name, email or specialization..." value={search} onChange={(e) => handleSearchChange(e.target.value)} />
+          </div>
+          <select className="input sm:w-48" value={roleFilter} onChange={(e) => handleRoleFilter(e.target.value)}>
+            <option value="">All Roles</option>
+            {ROLES.map((r) => <option key={r} value={r}>{r}</option>)}
+          </select>
         </div>
-        <select className="input sm:w-48" value={roleFilter} onChange={(e) => setRoleFilter(e.target.value)}>
-          <option value="">All Roles</option>
-          {ROLES.map((r) => <option key={r} value={r}>{r}</option>)}
-        </select>
+        <div className="flex items-center gap-2 text-sm text-gray-500 shrink-0">
+          <span className="hidden sm:inline">Show</span>
+          <div className="flex gap-1">
+            {PAGE_SIZE_OPTIONS.map((n) => (
+              <button
+                key={n}
+                onClick={() => handleLimitChange(n)}
+                className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-colors ${
+                  limit === n ? 'bg-orange-500 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                }`}
+              >
+                {n}
+              </button>
+            ))}
+          </div>
+          <span className="hidden sm:inline">per page</span>
+        </div>
       </div>
 
       <div className="card p-0 overflow-hidden">
@@ -156,6 +182,30 @@ export default function StaffPage() {
                   ))}
                 </tbody>
               </table>
+            </div>
+
+            {/* Pagination */}
+            <div className="flex items-center justify-between px-4 py-3 border-t border-gray-100">
+              <p className="text-xs text-gray-500">{from}–{to} of {total}</p>
+              {pages > 1 && (
+                <div className="flex items-center gap-1">
+                  <button
+                    onClick={() => setPage((p) => p - 1)}
+                    disabled={page === 1}
+                    className="p-1.5 rounded-lg text-gray-500 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                  </button>
+                  <span className="text-sm text-gray-700 px-2">{page} / {pages}</span>
+                  <button
+                    onClick={() => setPage((p) => p + 1)}
+                    disabled={page === pages}
+                    className="p-1.5 rounded-lg text-gray-500 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                  >
+                    <ChevronRight className="w-4 h-4" />
+                  </button>
+                </div>
+              )}
             </div>
           </>
         )}

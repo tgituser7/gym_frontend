@@ -61,6 +61,10 @@ export const api = {
   members: {
     list: (params?: { search?: string; status?: string }) =>
       request<Member[]>(`/members${buildQuery(params ?? {})}`),
+    listPaged: (params?: { search?: string; status?: string; page?: number; limit?: number }) =>
+      request<{ members: Member[]; total: number; page: number; pages: number }>(
+        `/members${buildQuery({ search: params?.search, status: params?.status, page: params?.page?.toString(), limit: params?.limit?.toString() })}`
+      ),
     get: (id: string) => request<Member>(`/members/${id}`),
     renewals: (params?: { days?: number; page?: number; limit?: number }) =>
       request<{ members: Member[]; total: number; page: number; pages: number }>(
@@ -77,6 +81,10 @@ export const api = {
   staff: {
     list: (params?: { search?: string; status?: string; role?: string }) =>
       request<Staff[]>(`/staff${buildQuery(params ?? {})}`),
+    listPaged: (params?: { search?: string; status?: string; role?: string; page?: number; limit?: number }) =>
+      request<{ staff: Staff[]; total: number; page: number; pages: number }>(
+        `/staff${buildQuery({ search: params?.search, status: params?.status, role: params?.role, page: params?.page?.toString(), limit: params?.limit?.toString() })}`
+      ),
     get: (id: string) => request<Staff>(`/staff/${id}`),
     create: (data: Partial<Staff>) =>
       request<Staff>('/staff', { method: 'POST', body: JSON.stringify(data) }),
@@ -89,6 +97,10 @@ export const api = {
   services: {
     list: (params?: { search?: string; status?: string; category?: string }) =>
       request<Service[]>(`/services${buildQuery(params ?? {})}`),
+    listPaged: (params?: { search?: string; status?: string; category?: string; page?: number; limit?: number }) =>
+      request<{ services: Service[]; total: number; page: number; pages: number }>(
+        `/services${buildQuery({ search: params?.search, status: params?.status, category: params?.category, page: params?.page?.toString(), limit: params?.limit?.toString() })}`
+      ),
     get: (id: string) => request<Service>(`/services/${id}`),
     create: (data: Partial<Service>) =>
       request<Service>('/services', { method: 'POST', body: JSON.stringify(data) }),
@@ -101,6 +113,10 @@ export const api = {
   fees: {
     list: (params?: { status?: string; memberId?: string }) =>
       request<Fee[]>(`/fees${buildQuery(params ?? {})}`),
+    listPaged: (params?: { status?: string; page?: number; limit?: number }) =>
+      request<{ fees: Fee[]; total: number; page: number; pages: number; summary: { totalPaid: number; totalOutstanding: number; overdueCount: number } }>(
+        `/fees${buildQuery({ status: params?.status, page: params?.page?.toString(), limit: params?.limit?.toString() })}`
+      ),
     get: (id: string) => request<Fee>(`/fees/${id}`),
     create: (data: Partial<Fee>) =>
       request<Fee>('/fees', { method: 'POST', body: JSON.stringify(data) }),

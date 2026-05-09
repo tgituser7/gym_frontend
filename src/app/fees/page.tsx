@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
-import { Plus, Pencil, Trash2, AlertCircle, CheckCircle, Clock, XCircle } from 'lucide-react';
+import { Plus, Pencil, Trash2, AlertCircle, CheckCircle, Clock, XCircle, ChevronLeft, ChevronRight } from 'lucide-react';
 import { api } from '@/lib/api';
 import { Fee, Member } from '@/types';
 import { formatDate } from '@/lib/dates';
@@ -26,8 +26,15 @@ const STATUS_LABELS: Record<string, string> = {
   overdue: 'Overdue',
 };
 
+const PAGE_SIZE_OPTIONS = [10, 50, 100, 500];
+
 export default function FeesPage() {
   const [fees, setFees] = useState<Fee[]>([]);
+  const [total, setTotal] = useState(0);
+  const [pages, setPages] = useState(1);
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(10);
+  const [summary, setSummary] = useState({ totalPaid: 0, totalOutstanding: 0, overdueCount: 0 });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
@@ -37,54 +44,50 @@ export default function FeesPage() {
   const [deleteLoading, setDeleteLoading] = useState(false);
 
   const fetchFees = useCallback(async () => {
-    setLoading(true);
-    setError('');
+    setLoading(true); setError('');
     try {
-      const data = await api.fees.list({ status: statusFilter });
-      setFees(data);
+      const res = await api.fees.listPaged({ status: statusFilter, page, limit });
+      setFees(res.fees);
+      setTotal(res.total);
+      setPages(res.pages);
+      setSummary(res.summary);
     } catch {
       setError('Failed to load fees');
-    } finally {
-      setLoading(false);
-    }
-  }, [statusFilter]);
+    } finally { setLoading(false); }
+  }, [statusFilter, page, limit]);
 
   useEffect(() => { fetchFees(); }, [fetchFees]);
+
+  const handleStatusFilter = (s: string) => { setStatusFilter(s); setPage(1); };
+  const handleLimitChange = (l: number) => { setLimit(l); setPage(1); };
 
   const handleDelete = async () => {
     if (!deleteTarget) return;
     setDeleteLoading(true);
     try {
       await api.fees.delete(deleteTarget._id);
-      setFees((prev) => prev.filter((f) => f._id !== deleteTarget._id));
       setDeleteTarget(null);
+      // Go to previous page if we deleted the last item on this page
+      const newPage = fees.length === 1 && page > 1 ? page - 1 : page;
+      if (newPage !== page) setPage(newPage); else fetchFees();
     } catch {
       setError('Failed to delete fee');
-    } finally {
-      setDeleteLoading(false);
-    }
+    } finally { setDeleteLoading(false); }
   };
 
-  const handleSaved = (item: Fee) => {
-    setFees((prev) => {
-      const idx = prev.findIndex((f) => f._id === item._id);
-      if (idx >= 0) { const next = [...prev]; next[idx] = item; return next; }
-      return [item, ...prev];
-    });
-    setModalOpen(false);
-  };
+  const handleSaved = () => { setModalOpen(false); fetchFees(); };
 
   const openEdit = (f: Fee) => { setSelected(f); setModalOpen(true); };
 
-  const totalPaid = fees.filter((f) => f.status === 'paid').reduce((s, f) => s + f.amount, 0);
-  const totalPending = fees.filter((f) => f.status !== 'paid').reduce((s, f) => s + f.amount, 0);
+  const from = total === 0 ? 0 : (page - 1) * limit + 1;
+  const to = Math.min(page * limit, total);
 
   return (
     <div className="space-y-5">
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-xl sm:text-2xl font-bold text-gray-900">Fees</h2>
-          <p className="text-gray-500 text-sm mt-0.5">{fees.length} records</p>
+          <p className="text-gray-500 text-sm mt-0.5">{total} records</p>
         </div>
         <button className="btn-primary text-sm" onClick={() => { setSelected(null); setModalOpen(true); }}>
           <Plus className="w-4 h-4" />
@@ -98,21 +101,21 @@ export default function FeesPage() {
           <CheckCircle className="w-6 h-6 sm:w-8 sm:h-8 text-green-500 shrink-0" />
           <div className="min-w-0">
             <p className="text-xs text-gray-500">Collected</p>
-            <p className="text-base sm:text-xl font-bold text-gray-900 truncate">₹{totalPaid.toLocaleString()}</p>
+            <p className="text-base sm:text-xl font-bold text-gray-900 truncate">₹{summary.totalPaid.toLocaleString()}</p>
           </div>
         </div>
         <div className="card flex items-center gap-2 sm:gap-3 p-3 sm:p-4">
           <Clock className="w-6 h-6 sm:w-8 sm:h-8 text-yellow-500 shrink-0" />
           <div className="min-w-0">
             <p className="text-xs text-gray-500">Outstanding</p>
-            <p className="text-base sm:text-xl font-bold text-gray-900 truncate">₹{totalPending.toLocaleString()}</p>
+            <p className="text-base sm:text-xl font-bold text-gray-900 truncate">₹{summary.totalOutstanding.toLocaleString()}</p>
           </div>
         </div>
         <div className="card flex items-center gap-2 sm:gap-3 p-3 sm:p-4">
           <XCircle className="w-6 h-6 sm:w-8 sm:h-8 text-red-500 shrink-0" />
           <div className="min-w-0">
             <p className="text-xs text-gray-500">Overdue</p>
-            <p className="text-base sm:text-xl font-bold text-gray-900">{fees.filter((f) => f.status === 'overdue').length}</p>
+            <p className="text-base sm:text-xl font-bold text-gray-900">{summary.overdueCount}</p>
           </div>
         </div>
       </div>
@@ -123,13 +126,28 @@ export default function FeesPage() {
         </div>
       )}
 
-      <div className="card p-3 sm:p-4">
-        <select className="input w-full sm:w-48" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
+      <div className="card p-3 sm:p-4 flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
+        <select className="input w-full sm:w-48" value={statusFilter} onChange={(e) => handleStatusFilter(e.target.value)}>
           <option value="">All Status</option>
           <option value="paid">Paid</option>
-          <option value="pending">Due</option>
-          <option value="overdue">Overdue</option>
         </select>
+        <div className="flex items-center gap-2 text-sm text-gray-500 shrink-0">
+          <span className="hidden sm:inline">Show</span>
+          <div className="flex gap-1">
+            {PAGE_SIZE_OPTIONS.map((n) => (
+              <button
+                key={n}
+                onClick={() => handleLimitChange(n)}
+                className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-colors ${
+                  limit === n ? 'bg-orange-500 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                }`}
+              >
+                {n}
+              </button>
+            ))}
+          </div>
+          <span className="hidden sm:inline">per page</span>
+        </div>
       </div>
 
       <div className="card p-0 overflow-hidden">
@@ -153,8 +171,7 @@ export default function FeesPage() {
                         <span className="text-sm font-semibold text-gray-900">₹{f.amount.toLocaleString()}</span>
                       </div>
                       <p className="text-xs text-gray-400 mt-0.5">
-                        Due {formatDate(f.dueDate)}
-                        {f.description ? ` · ${f.description}` : ''}
+                        Due {formatDate(f.dueDate)}{f.description ? ` · ${f.description}` : ''}
                       </p>
                     </div>
                     <div className="flex gap-1 shrink-0 mt-0.5">
@@ -212,6 +229,30 @@ export default function FeesPage() {
                   })}
                 </tbody>
               </table>
+            </div>
+
+            {/* Pagination */}
+            <div className="flex items-center justify-between px-4 py-3 border-t border-gray-100">
+              <p className="text-xs text-gray-500">{from}–{to} of {total}</p>
+              {pages > 1 && (
+                <div className="flex items-center gap-1">
+                  <button
+                    onClick={() => setPage((p) => p - 1)}
+                    disabled={page === 1}
+                    className="p-1.5 rounded-lg text-gray-500 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                  </button>
+                  <span className="text-sm text-gray-700 px-2">{page} / {pages}</span>
+                  <button
+                    onClick={() => setPage((p) => p + 1)}
+                    disabled={page === pages}
+                    className="p-1.5 rounded-lg text-gray-500 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                  >
+                    <ChevronRight className="w-4 h-4" />
+                  </button>
+                </div>
+              )}
             </div>
           </>
         )}

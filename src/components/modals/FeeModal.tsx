@@ -13,7 +13,7 @@ const FORM_ID = 'fee-form';
 const EMPTY = {
   member: '', amount: '' as number | string, description: '',
   dueDate: todayInputDate(), paymentDate: '',
-  status: 'pending' as Fee['status'],
+  status: 'paid' as Fee['status'],
   paymentMethod: '' as Fee['paymentMethod'] | '',
   services: [] as string[],
 };
@@ -87,9 +87,9 @@ export default function FeeModal({ fee, onClose, onSaved }: Props) {
           <div>
             <label className="label">Status</label>
             <select className="input" value={form.status} onChange={(e) => set('status', e.target.value)}>
-              <option value="pending">Due</option>
+              {fee && <option value="pending">Due</option>}
               <option value="paid">Paid</option>
-              <option value="overdue">Overdue</option>
+              {fee && <option value="overdue">Overdue</option>}
             </select>
           </div>
           <div><label className="label">Due Date *</label><input className="input" type="date" required value={form.dueDate} onChange={(e) => set('dueDate', e.target.value)} /></div>
