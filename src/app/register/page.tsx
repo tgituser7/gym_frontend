@@ -75,7 +75,7 @@ export default function RegisterPage() {
           <div className="w-10 h-10 bg-orange-500 rounded-xl flex items-center justify-center">
             <Zap className="w-6 h-6 text-white" />
           </div>
-          <span className="text-2xl font-bold text-gray-900">FlexMS</span>
+          <span className="text-2xl font-bold text-gray-900">Fitark</span>
         </div>
 
         <div className="card">

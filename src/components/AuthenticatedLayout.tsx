@@ -60,7 +60,7 @@ export default function AuthenticatedLayout({ children }: { children: React.Reac
             <div className="w-6 h-6 bg-orange-500 rounded flex items-center justify-center">
               <Zap className="w-3.5 h-3.5 text-white" />
             </div>
-            <span className="font-bold text-sm">FlexMS</span>
+            <span className="font-bold text-sm">Fitark</span>
           </div>
         </header>
 

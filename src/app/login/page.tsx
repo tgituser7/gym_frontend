@@ -43,7 +43,7 @@ export default function LoginPage() {
             <div className="w-12 h-12 bg-orange-500 rounded-xl flex items-center justify-center">
               <Zap className="w-7 h-7 text-white" />
             </div>
-            <h1 className="text-3xl font-bold">FlexMS</h1>
+            <h1 className="text-3xl font-bold">Fitark</h1>
           </div>
           <h2 className="text-4xl font-bold leading-tight mb-4">
             Manage your gym, <span className="text-orange-400">effortlessly.</span>
@@ -73,7 +73,7 @@ export default function LoginPage() {
             <div className="w-9 h-9 bg-orange-500 rounded-lg flex items-center justify-center">
               <Zap className="w-5 h-5 text-white" />
             </div>
-            <span className="text-xl font-bold text-gray-900">FlexMS</span>
+            <span className="text-xl font-bold text-gray-900">Fitark</span>
           </div>
 
           <h2 className="text-2xl font-bold text-gray-900 mb-2">Welcome back</h2>
