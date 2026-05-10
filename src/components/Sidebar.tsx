@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
   LayoutDashboard, Users, UserCheck, Dumbbell,
-  DollarSign, Zap, LogOut, X, Bell,
+  DollarSign, LogOut, X, Bell,
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { Gym } from '@/types';
@@ -51,10 +51,16 @@ export default function Sidebar({ open = false, onClose }: Props) {
         <div className="flex items-center justify-between px-6 py-5 border-b border-slate-700">
           <div className="flex items-center gap-3 min-w-0">
             <div className="w-9 h-9 bg-orange-500 rounded-lg flex items-center justify-center shrink-0">
-              <Zap className="w-5 h-5 text-white" />
+              <svg viewBox="0 0 24 24" fill="white" className="w-5 h-5" xmlns="http://www.w3.org/2000/svg">
+                <rect x="1" y="8.5" width="4" height="7" rx="1.5"/>
+                <rect x="5" y="10.5" width="2.5" height="3" rx="0.75"/>
+                <rect x="7.5" y="11" width="9" height="2" rx="0.75"/>
+                <rect x="16.5" y="10.5" width="2.5" height="3" rx="0.75"/>
+                <rect x="19" y="8.5" width="4" height="7" rx="1.5"/>
+              </svg>
             </div>
             <div className="min-w-0">
-              <h1 className="font-bold text-lg leading-tight truncate">{gym?.name || 'FlexMS'}</h1>
+              <h1 className="font-bold text-lg leading-tight truncate">{gym?.name || 'Fitark'}</h1>
               <p className="text-slate-400 text-xs">Management System</p>
             </div>
           </div>

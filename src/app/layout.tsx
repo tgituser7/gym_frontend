@@ -4,7 +4,7 @@ import { AuthProvider } from '@/context/AuthContext';
 import AuthenticatedLayout from '@/components/AuthenticatedLayout';
 
 export const metadata: Metadata = {
-  title: 'FlexMS - Gym Management System',
+  title: 'Fitark - Gym Management System',
   description: 'Complete gym management solution for multi-branch gyms',
 };
 
