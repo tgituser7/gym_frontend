@@ -7,7 +7,7 @@ import { Service, Staff } from '@/types';
 import ServiceModal from '@/components/modals/ServiceModal';
 import ConfirmDialog from '@/components/ConfirmDialog';
 
-const CATEGORIES = ['Yoga', 'Cardio', 'Strength', 'Pilates', 'Swimming', 'Martial Arts', 'Dance', 'Nutrition', 'Other'];
+const CATEGORIES = ['Yoga', 'Strength', 'Swimming', 'Martial Arts', 'Dance', 'Nutrition', 'Other'];
 const PAGE_SIZE_OPTIONS = [10, 50, 100, 500];
 
 export default function ServicesPage() {
