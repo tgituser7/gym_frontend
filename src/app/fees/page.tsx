@@ -21,7 +21,7 @@ const STATUS_STYLES: Record<string, string> = {
 };
 
 const STATUS_LABELS: Record<string, string> = {
-  paid: 'Paid',
+  paid: 'Settled',
   pending: 'Due',
   overdue: 'Overdue',
 };
@@ -129,7 +129,7 @@ export default function FeesPage() {
       <div className="card p-3 sm:p-4 flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
         <select className="input w-full sm:w-48" value={statusFilter} onChange={(e) => handleStatusFilter(e.target.value)}>
           <option value="">All Status</option>
-          <option value="paid">Paid</option>
+          <option value="paid">Settled</option>
         </select>
         <div className="flex items-center gap-2 text-sm text-gray-500 shrink-0">
           <span className="hidden sm:inline">Show</span>

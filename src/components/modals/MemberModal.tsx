@@ -31,7 +31,7 @@ const STATUS_STYLES: Record<string, string> = {
 };
 
 const STATUS_LABELS: Record<string, string> = {
-  paid: 'Paid',
+  paid: 'Settled',
   pending: 'Due',
   overdue: 'Overdue',
 };

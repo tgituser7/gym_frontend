@@ -146,7 +146,7 @@ export default function DashboardPage() {
                         ₹{f.amount.toLocaleString()}
                       </p>
                       <span className={f.status === 'overdue' ? 'badge-overdue' : 'badge-pending'}>
-                        {f.status === 'pending' ? 'Due' : f.status === 'overdue' ? 'Overdue' : 'Paid'}
+                        {f.status === 'pending' ? 'Due' : f.status === 'overdue' ? 'Overdue' : 'Settled'}
                       </span>
                     </div>
                   </div>
