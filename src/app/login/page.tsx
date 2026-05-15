@@ -2,7 +2,8 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { Zap, Eye, EyeOff } from 'lucide-react';
+import { Eye, EyeOff } from 'lucide-react';
+import FitarkLogo from '@/components/FitarkLogo';
 import { useAuth } from '@/context/AuthContext';
 
 export default function LoginPage() {
@@ -40,9 +41,7 @@ export default function LoginPage() {
       <div className="hidden lg:flex lg:w-1/2 bg-slate-900 items-center justify-center p-12">
         <div className="text-white max-w-md">
           <div className="flex items-center gap-3 mb-8">
-            <div className="w-12 h-12 bg-orange-500 rounded-xl flex items-center justify-center">
-              <Zap className="w-7 h-7 text-white" />
-            </div>
+            <FitarkLogo size={48} />
             <h1 className="text-3xl font-bold">Fitark</h1>
           </div>
           <h2 className="text-4xl font-bold leading-tight mb-4">
@@ -70,9 +69,7 @@ export default function LoginPage() {
       <div className="flex-1 flex items-center justify-center p-8 bg-gray-50">
         <div className="w-full max-w-md">
           <div className="lg:hidden flex items-center gap-2 mb-8">
-            <div className="w-9 h-9 bg-orange-500 rounded-lg flex items-center justify-center">
-              <Zap className="w-5 h-5 text-white" />
-            </div>
+            <FitarkLogo size={36} />
             <span className="text-xl font-bold text-gray-900">Fitark</span>
           </div>
 

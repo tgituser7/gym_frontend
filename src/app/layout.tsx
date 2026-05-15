@@ -6,6 +6,7 @@ import AuthenticatedLayout from '@/components/AuthenticatedLayout';
 export const metadata: Metadata = {
   title: 'Fitark - Gym Management System',
   description: 'Gym management solution for multi-branch gyms',
+  icons: { icon: '/favicon.svg' },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

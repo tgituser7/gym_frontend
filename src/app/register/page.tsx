@@ -2,7 +2,8 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { Zap, ChevronRight, ChevronLeft } from 'lucide-react';
+import { ChevronRight, ChevronLeft } from 'lucide-react';
+import FitarkLogo from '@/components/FitarkLogo';
 import { useAuth } from '@/context/AuthContext';
 
 type Step = 1 | 2;
@@ -77,9 +78,7 @@ export default function RegisterPage() {
     <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
       <div className="w-full max-w-lg">
         <div className="flex items-center gap-2 mb-8 justify-center">
-          <div className="w-10 h-10 bg-orange-500 rounded-xl flex items-center justify-center">
-            <Zap className="w-6 h-6 text-white" />
-          </div>
+          <FitarkLogo size={40} />
           <span className="text-2xl font-bold text-gray-900">Fitark</span>
         </div>
 
@@ -145,7 +144,7 @@ export default function RegisterPage() {
                   <input className="input" value={form.city} onChange={(e) => set('city', e.target.value)} />
                 </div>
                 <div>
-                  <label className="label">State / Province</label>
+                  <label className="label">State</label>
                   <input className="input" value={form.state} onChange={(e) => set('state', e.target.value)} />
                 </div>
                 <div>

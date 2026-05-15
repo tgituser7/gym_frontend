@@ -2,11 +2,12 @@
 
 import { useEffect, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
-import { Menu, Zap } from 'lucide-react';
+import { Menu } from 'lucide-react';
+import FitarkLogo from '@/components/FitarkLogo';
 import { useAuth } from '@/context/AuthContext';
 import Sidebar from './Sidebar';
 
-const AUTH_ROUTES = ['/login', '/register', '/terms', '/privacy', '/'];
+const AUTH_ROUTES = ['/login', '/register', '/terms', '/privacy', '/', '/chat'];
 
 export default function AuthenticatedLayout({ children }: { children: React.ReactNode }) {
   const { token, loading } = useAuth();
@@ -57,9 +58,7 @@ export default function AuthenticatedLayout({ children }: { children: React.Reac
             <Menu className="w-5 h-5" />
           </button>
           <div className="flex items-center gap-2">
-            <div className="w-6 h-6 bg-orange-500 rounded flex items-center justify-center">
-              <Zap className="w-3.5 h-3.5 text-white" />
-            </div>
+            <FitarkLogo size={24} />
             <span className="font-bold text-sm">Fitark</span>
           </div>
         </header>

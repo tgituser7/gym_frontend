@@ -2,10 +2,9 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { Bell, MessageCircle, Phone, AlertCircle, ChevronLeft, ChevronRight } from 'lucide-react';
-import { DateTime } from 'luxon';
 import { api } from '@/lib/api';
 import { Member, Service, Gym } from '@/types';
-import { formatDate } from '@/lib/dates';
+import { formatDate, daysUntilDate } from '@/lib/dates';
 import { useAuth } from '@/context/AuthContext';
 
 const PAGE_LIMIT = 20;
@@ -21,11 +20,6 @@ const WINDOWS = [
 
 type Summary = { days3: number; days7: number; days14: number; days30: number; total: number };
 
-function daysUntil(iso: string): number {
-  return Math.ceil(
-    DateTime.fromISO(iso, { zone: 'utc' }).diff(DateTime.now().toUTC().startOf('day'), 'days').days
-  );
-}
 
 function urgencyClass(d: number): string {
   if (d < 0) return 'bg-red-100 text-red-700';
@@ -151,7 +145,7 @@ export default function RenewalsPage() {
             <div className="sm:hidden divide-y divide-gray-100">
               {members.map((m) => {
                 const services = m.services as Service[];
-                const d = daysUntil(m.membershipEndDate!);
+                const d = daysUntilDate(m.membershipEndDate!);
                 const expiry = formatDate(m.membershipEndDate!);
                 return (
                   <div key={m._id} className="px-4 py-3">
@@ -213,7 +207,7 @@ export default function RenewalsPage() {
                 <tbody className="divide-y divide-gray-50">
                   {members.map((m) => {
                     const services = m.services as Service[];
-                    const d = daysUntil(m.membershipEndDate!);
+                    const d = daysUntilDate(m.membershipEndDate!);
                     const expiry = formatDate(m.membershipEndDate!);
                     return (
                       <tr key={m._id} className="hover:bg-gray-50 transition-colors">

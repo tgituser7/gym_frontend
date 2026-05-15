@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { Users, Dumbbell, UserCheck } from 'lucide-react';
+import { formatDate } from '@/lib/dates';
 import { api } from '@/lib/api';
 import { SubscriptionInfo } from '@/types';
 
@@ -49,7 +50,7 @@ export default function SubscriptionPage() {
               </span>
             </div>
             <p className="text-sm text-gray-500 mt-0.5">
-              Started {new Date(subscription.startDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })}
+              Started {formatDate(subscription.startDate)}
             </p>
           </div>
           <div className="text-right">

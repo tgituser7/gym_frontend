@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { Users, Dumbbell, UserCheck, TrendingUp, Bell, LayoutDashboard, Mail } from 'lucide-react';
+import FitarkLogo from '@/components/FitarkLogo';
 
 const features = [
   {
@@ -40,20 +41,17 @@ export default function IntroPage() {
       {/* Header */}
       <header className="bg-slate-900 text-white px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 bg-orange-500 rounded-lg flex items-center justify-center shrink-0">
-            <svg viewBox="0 0 24 24" fill="white" className="w-5 h-5" xmlns="http://www.w3.org/2000/svg">
-              <rect x="1" y="8.5" width="4" height="7" rx="1.5"/>
-              <rect x="5" y="10.5" width="2.5" height="3" rx="0.75"/>
-              <rect x="7.5" y="11" width="9" height="2" rx="0.75"/>
-              <rect x="16.5" y="10.5" width="2.5" height="3" rx="0.75"/>
-              <rect x="19" y="8.5" width="4" height="7" rx="1.5"/>
-            </svg>
-          </div>
+          <FitarkLogo size={36} />
           <span className="font-bold text-xl">Fitark</span>
         </div>
-        <Link href="/login" className="text-sm font-medium text-slate-300 hover:text-white transition-colors">
-          Sign In
-        </Link>
+        <div className="flex items-center gap-5">
+          <Link href="/chat" className="text-sm font-medium text-slate-300 hover:text-white transition-colors">
+            Contact
+          </Link>
+          <Link href="/login" className="text-sm font-medium text-slate-300 hover:text-white transition-colors">
+            Sign In
+          </Link>
+        </div>
       </header>
 
       <main className="flex-1">
@@ -113,12 +111,12 @@ export default function IntroPage() {
             <p className="text-slate-400 text-sm mt-3 mb-6">
               For more details and requirements, or to get started,<br className="hidden sm:block" /> reach out to us directly.
             </p>
-            <a
-              href="mailto:hello.flexms@gmail.com"
+            <Link
+              href="/chat"
               className="inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white font-semibold px-5 py-2.5 rounded-xl transition-colors text-sm"
             >
-              <Mail className="w-4 h-4" /> hello.flexms@gmail.com
-            </a>
+              <Mail className="w-4 h-4" /> Chat with us
+            </Link>
           </div>
         </section>
       </main>
