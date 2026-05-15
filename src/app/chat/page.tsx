@@ -107,11 +107,6 @@ export default function ChatPage() {
                 </div>
               </div>
 
-              <div className="mt-auto pt-6 border-t border-slate-700">
-                <p className="text-xs text-slate-500 leading-relaxed">
-                  Plans start at <span className="text-orange-400 font-semibold">₹600/month</span>. We'll walk you through everything on a quick call.
-                </p>
-              </div>
             </div>
 
             {/* Right — form */}

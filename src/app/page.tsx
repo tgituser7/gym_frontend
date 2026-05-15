@@ -46,7 +46,7 @@ export default function IntroPage() {
         </div>
         <div className="flex items-center gap-5">
           <Link href="/chat" className="text-sm font-medium text-slate-300 hover:text-white transition-colors">
-            Contact
+            Chat with us
           </Link>
           <Link href="/login" className="text-sm font-medium text-slate-300 hover:text-white transition-colors">
             Sign In
