@@ -93,7 +93,7 @@ export default function FeeModal({ fee, onClose, onSaved }: Props) {
             </select>
           </div>
           <div><label className="label">Due Date *</label><input className="input" type="date" required value={form.dueDate} onChange={(e) => set('dueDate', e.target.value)} /></div>
-          <div><label className="label">Payment Date</label><input className="input" type="date" value={form.paymentDate} onChange={(e) => set('paymentDate', e.target.value)} /></div>
+          <div><label className="label">Fees Settled On</label><input className="input" type="date" value={form.paymentDate} onChange={(e) => set('paymentDate', e.target.value)} /></div>
           <div>
             <label className="label">Payment Method</label>
             <select className="input" value={form.paymentMethod} onChange={(e) => set('paymentMethod', e.target.value)}>

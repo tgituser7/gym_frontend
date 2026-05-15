@@ -12,6 +12,7 @@ export default function RegisterPage() {
   const [step, setStep] = useState<Step>(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [form, setForm] = useState({
     name: '',
     email: '',
@@ -45,6 +46,10 @@ export default function RegisterPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!acceptedTerms) {
+      setError('You must accept the Terms & Conditions to register.');
+      return;
+    }
     setLoading(true);
     setError('');
     try {
@@ -152,11 +157,28 @@ export default function RegisterPage() {
                   <textarea className="input resize-none" rows={2} value={form.description} onChange={(e) => set('description', e.target.value)} placeholder="Tell members about your gym..." />
                 </div>
               </div>
+
+              <div className="flex items-start gap-3 mt-2 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                <input
+                  id="acceptTerms"
+                  type="checkbox"
+                  checked={acceptedTerms}
+                  onChange={(e) => setAcceptedTerms(e.target.checked)}
+                  className="mt-0.5 h-4 w-4 accent-orange-500 cursor-pointer shrink-0"
+                />
+                <div className="text-sm text-gray-600 leading-relaxed">
+                  <label htmlFor="acceptTerms" className="cursor-pointer">I agree to the </label>
+                  <a href="/terms" target="_blank" rel="noopener noreferrer" className="text-orange-500 hover:text-orange-600 font-medium underline">Terms &amp; Conditions</a>
+                  <label htmlFor="acceptTerms" className="cursor-pointer"> and </label>
+                  <a href="/privacy" target="_blank" rel="noopener noreferrer" className="text-orange-500 hover:text-orange-600 font-medium underline">Privacy Policy</a>
+                </div>
+              </div>
+
               <div className="flex gap-3 mt-2">
                 <button type="button" onClick={() => setStep(1)} className="btn-secondary flex-1 justify-center">
                   <ChevronLeft className="w-4 h-4" /> Back
                 </button>
-                <button type="submit" className="btn-primary flex-1 justify-center py-3" disabled={loading}>
+                <button type="submit" className="btn-primary flex-1 justify-center py-3" disabled={loading || !acceptedTerms}>
                   {loading ? 'Creating account...' : 'Register Gym'}
                 </button>
               </div>

@@ -6,7 +6,7 @@ import { Menu, Zap } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import Sidebar from './Sidebar';
 
-const AUTH_ROUTES = ['/login', '/register'];
+const AUTH_ROUTES = ['/login', '/register', '/terms', '/privacy'];
 
 export default function AuthenticatedLayout({ children }: { children: React.ReactNode }) {
   const { token, loading } = useAuth();
