@@ -6,7 +6,7 @@ import { Menu, Zap } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import Sidebar from './Sidebar';
 
-const AUTH_ROUTES = ['/login', '/register', '/terms', '/privacy'];
+const AUTH_ROUTES = ['/login', '/register', '/terms', '/privacy', '/'];
 
 export default function AuthenticatedLayout({ children }: { children: React.ReactNode }) {
   const { token, loading } = useAuth();
@@ -23,7 +23,7 @@ export default function AuthenticatedLayout({ children }: { children: React.Reac
       router.replace('/login');
     } else if (token && isAuthPage) {
       setRedirecting(true);
-      router.replace('/');
+      router.replace('/dashboard');
     } else {
       setRedirecting(false);
     }

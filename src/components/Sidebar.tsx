@@ -10,7 +10,7 @@ import { useAuth } from '@/context/AuthContext';
 import { Gym } from '@/types';
 
 const navItems = [
-  { href: '/', label: 'Dashboard', icon: LayoutDashboard },
+  { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/members', label: 'Members', icon: Users },
   { href: '/staff', label: 'Staff', icon: UserCheck },
   { href: '/services', label: 'Services', icon: Dumbbell },
