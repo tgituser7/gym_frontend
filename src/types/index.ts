@@ -10,7 +10,7 @@ export interface Gym {
   website?: string;
   description?: string;
   logo?: string;
-  status: 'active' | 'inactive' | 'suspended';
+  status: 'active' | 'inactive' | 'blocked' | 'suspended';
   createdAt: string;
   updatedAt: string;
 }
@@ -56,7 +56,7 @@ export interface Branch {
   email?: string;
   openingHours?: string;
   manager?: Staff | string;
-  status: 'active' | 'inactive';
+  status: 'active' | 'inactive' | 'blocked';
   notes?: string;
   subscription?: BranchSubscription;
   createdAt: string;

@@ -84,7 +84,9 @@ export default function BranchModal({ branch, onClose, onSaved }: Props) {
           <div>
             <label className="label">Status</label>
             <select className="input" value={form.status} onChange={(e) => set('status', e.target.value)}>
-              <option value="active">Active</option><option value="inactive">Inactive</option>
+              <option value="active">Active</option>
+              <option value="inactive">Inactive</option>
+              <option value="blocked">Blocked</option>
             </select>
           </div>
           <div className="sm:col-span-2"><label className="label">Notes</label><textarea className="input resize-none" rows={2} value={form.notes} onChange={(e) => set('notes', e.target.value)} /></div>

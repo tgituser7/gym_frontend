@@ -106,8 +106,12 @@ export default function BranchesPage() {
                 <div className="flex items-start justify-between mb-3">
                   <div>
                     <h3 className="font-semibold text-gray-900 text-lg">{b.name}</h3>
-                    <span className={b.status === 'active' ? 'badge-active' : 'badge-inactive'}>
-                      {b.status}
+                    <span className={
+                      b.status === 'active' ? 'badge-active'
+                      : b.status === 'blocked' ? 'px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-700'
+                      : 'badge-inactive'
+                    }>
+                      {b.status.charAt(0).toUpperCase() + b.status.slice(1)}
                     </span>
                   </div>
                   <div className="flex gap-1">

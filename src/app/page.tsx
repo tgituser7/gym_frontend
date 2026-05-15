@@ -74,7 +74,7 @@ export default function IntroPage() {
               href="/register"
               className="inline-flex items-center justify-center bg-orange-500 hover:bg-orange-600 text-white font-semibold px-6 py-3 rounded-xl transition-colors text-sm"
             >
-              Get Started Free
+              Get Started
             </Link>
             <Link
               href="/login"
