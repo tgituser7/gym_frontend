@@ -193,7 +193,7 @@ export default function FeesPage() {
                     <th className="text-left px-4 py-3 font-medium text-gray-600">Amount</th>
                     <th className="text-left px-4 py-3 font-medium text-gray-600">Due Date</th>
                     <th className="text-left px-4 py-3 font-medium text-gray-600">Fees Settled On</th>
-                    <th className="text-left px-4 py-3 font-medium text-gray-600">Method</th>
+                    <th className="text-left px-4 py-3 font-medium text-gray-600">Fees Method</th>
                     <th className="text-left px-4 py-3 font-medium text-gray-600">Status</th>
                     <th className="text-right px-4 py-3 font-medium text-gray-600">Actions</th>
                   </tr>
