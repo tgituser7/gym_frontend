@@ -90,9 +90,9 @@ export interface Fee {
   amount: number;
   description?: string;
   dueDate: string;
-  paymentDate?: string;
-  status: 'paid' | 'pending' | 'overdue';
-  paymentMethod?: 'cash' | 'card' | 'online' | 'other';
+  settledOn?: string;
+  status: 'settled' | 'due' | 'overdue';
+  feesMethod?: 'cash' | 'card' | 'online' | 'other';
   services?: Service[] | string[];
   createdAt: string;
   updatedAt: string;

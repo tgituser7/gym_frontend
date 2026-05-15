@@ -9,20 +9,20 @@ import FeeModal from '@/components/modals/FeeModal';
 import ConfirmDialog from '@/components/ConfirmDialog';
 
 const STATUS_ICONS = {
-  paid: <CheckCircle className="w-4 h-4 text-green-500" />,
-  pending: <Clock className="w-4 h-4 text-yellow-500" />,
+  settled: <CheckCircle className="w-4 h-4 text-green-500" />,
+  due: <Clock className="w-4 h-4 text-yellow-500" />,
   overdue: <XCircle className="w-4 h-4 text-red-500" />,
 };
 
 const STATUS_STYLES: Record<string, string> = {
-  paid: 'bg-green-100 text-green-700',
-  pending: 'bg-yellow-100 text-yellow-700',
+  settled: 'bg-green-100 text-green-700',
+  due: 'bg-yellow-100 text-yellow-700',
   overdue: 'bg-red-100 text-red-700',
 };
 
 const STATUS_LABELS: Record<string, string> = {
-  paid: 'Settled',
-  pending: 'Due',
+  settled: 'Settled',
+  due: 'Due',
   overdue: 'Overdue',
 };
 
@@ -129,7 +129,7 @@ export default function FeesPage() {
       <div className="card p-3 sm:p-4 flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
         <select className="input w-full sm:w-48" value={statusFilter} onChange={(e) => handleStatusFilter(e.target.value)}>
           <option value="">All Status</option>
-          <option value="paid">Settled</option>
+          <option value="settled">Settled</option>
         </select>
         <div className="flex items-center gap-2 text-sm text-gray-500 shrink-0">
           <span className="hidden sm:inline">Show</span>
@@ -210,8 +210,8 @@ export default function FeesPage() {
                         <td className="px-4 py-3 text-gray-600 max-w-xs truncate">{f.description || '-'}</td>
                         <td className="px-4 py-3 font-semibold text-gray-900">₹{f.amount.toLocaleString()}</td>
                         <td className="px-4 py-3 text-gray-600">{formatDate(f.dueDate)}</td>
-                        <td className="px-4 py-3 text-gray-600">{f.paymentDate ? formatDate(f.paymentDate) : '-'}</td>
-                        <td className="px-4 py-3 text-gray-600 capitalize">{f.paymentMethod || '-'}</td>
+                        <td className="px-4 py-3 text-gray-600">{f.settledOn ? formatDate(f.settledOn) : '-'}</td>
+                        <td className="px-4 py-3 text-gray-600 capitalize">{f.feesMethod || '-'}</td>
                         <td className="px-4 py-3">
                           <div className="flex items-center gap-1.5">
                             {STATUS_ICONS[f.status]}

@@ -25,14 +25,14 @@ const EMPTY = {
 };
 
 const STATUS_STYLES: Record<string, string> = {
-  paid: 'bg-green-100 text-green-700',
-  pending: 'bg-yellow-100 text-yellow-700',
+  settled: 'bg-green-100 text-green-700',
+  due: 'bg-yellow-100 text-yellow-700',
   overdue: 'bg-red-100 text-red-700',
 };
 
 const STATUS_LABELS: Record<string, string> = {
-  paid: 'Settled',
-  pending: 'Due',
+  settled: 'Settled',
+  due: 'Due',
   overdue: 'Overdue',
 };
 

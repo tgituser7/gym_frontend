@@ -12,9 +12,9 @@ const FORM_ID = 'fee-form';
 
 const EMPTY = {
   member: '', amount: '' as number | string, description: '',
-  dueDate: todayInputDate(), paymentDate: '',
-  status: 'paid' as Fee['status'],
-  paymentMethod: '' as Fee['paymentMethod'] | '',
+  dueDate: todayInputDate(), settledOn: '',
+  status: 'settled' as Fee['status'],
+  feesMethod: '' as Fee['feesMethod'] | '',
   services: [] as string[],
 };
 
@@ -38,8 +38,8 @@ export default function FeeModal({ fee, onClose, onSaved }: Props) {
       setForm({
         member: memberId, amount: fee.amount, description: fee.description || '',
         dueDate: isoToInputDate(fee.dueDate),
-        paymentDate: fee.paymentDate ? isoToInputDate(fee.paymentDate) : '',
-        status: fee.status, paymentMethod: fee.paymentMethod || '', services: svcIds,
+        settledOn: fee.settledOn ? isoToInputDate(fee.settledOn) : '',
+        status: fee.status, feesMethod: fee.feesMethod || '', services: svcIds,
       });
     } else {
       setForm({ ...EMPTY });
@@ -61,8 +61,8 @@ export default function FeeModal({ fee, onClose, onSaved }: Props) {
       const payload = {
         ...form, amount: Number(form.amount),
         dueDate: inputDateToISO(form.dueDate),
-        paymentDate: form.paymentDate ? inputDateToISO(form.paymentDate) : undefined,
-        paymentMethod: form.paymentMethod || undefined,
+        settledOn: form.settledOn ? inputDateToISO(form.settledOn) : undefined,
+        feesMethod: form.feesMethod || undefined,
       };
       const saved = fee ? await api.fees.update(fee._id, payload) : await api.fees.create(payload);
       onSaved(saved);
@@ -87,16 +87,16 @@ export default function FeeModal({ fee, onClose, onSaved }: Props) {
           <div>
             <label className="label">Status</label>
             <select className="input" value={form.status} onChange={(e) => set('status', e.target.value)}>
-              {fee && <option value="pending">Due</option>}
-              <option value="paid">Settled</option>
+              {fee && <option value="due">Due</option>}
+              <option value="settled">Settled</option>
               {fee && <option value="overdue">Overdue</option>}
             </select>
           </div>
           <div><label className="label">Due Date *</label><input className="input" type="date" required value={form.dueDate} onChange={(e) => set('dueDate', e.target.value)} /></div>
-          <div><label className="label">Fees Settled On</label><input className="input" type="date" value={form.paymentDate} onChange={(e) => set('paymentDate', e.target.value)} /></div>
+          <div><label className="label">Fees Settled On</label><input className="input" type="date" value={form.settledOn} onChange={(e) => set('settledOn', e.target.value)} /></div>
           <div>
             <label className="label">Fees Method</label>
-            <select className="input" value={form.paymentMethod} onChange={(e) => set('paymentMethod', e.target.value)}>
+            <select className="input" value={form.feesMethod} onChange={(e) => set('feesMethod', e.target.value)}>
               <option value="">Not specified</option>
               <option value="cash">Cash</option><option value="card">Card</option>
               <option value="online">Online</option><option value="other">Other</option>
