@@ -15,6 +15,36 @@ export interface Gym {
   updatedAt: string;
 }
 
+export interface SubscriptionTier {
+  _id: string;
+  name: string;
+  basePrice: number;
+  memberLimit: number;
+  serviceLimit: number;
+  staffLimit: number;
+  additionalMemberPrice: number;
+  additionalMemberUnit: number;
+  isActive: boolean;
+}
+
+export interface BranchSubscription {
+  tierId: string;
+  additionalMembers: number;
+  additionalStaff: number;
+  additionalServices: number;
+  additionalAmount: number;
+  status: 'active' | 'inactive';
+  startDate: string;
+}
+
+export interface SubscriptionInfo {
+  tier: SubscriptionTier;
+  subscription: BranchSubscription;
+  usage: { members: number; services: number; staff: number };
+  limits: { members: number; services: number; staff: number };
+  totalMonthlyAmount: number;
+}
+
 export interface Branch {
   _id: string;
   gym: string | Gym;
@@ -28,6 +58,7 @@ export interface Branch {
   manager?: Staff | string;
   status: 'active' | 'inactive';
   notes?: string;
+  subscription?: BranchSubscription;
   createdAt: string;
   updatedAt: string;
 }

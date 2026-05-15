@@ -1,25 +1,34 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Plus, Pencil, Trash2, AlertCircle, MapPin, Phone, Clock } from 'lucide-react';
+import { Pencil, Trash2, AlertCircle, MapPin, Phone, Clock, SlidersHorizontal } from 'lucide-react';
 import { api } from '@/lib/api';
-import { Branch } from '@/types';
+import { Branch, SubscriptionTier } from '@/types';
 import BranchModal from '@/components/modals/BranchModal';
+import BranchLimitsModal from '@/components/modals/BranchLimitsModal';
 import ConfirmDialog from '@/components/ConfirmDialog';
+
 export default function BranchesPage() {
   const [branches, setBranches] = useState<Branch[]>([]);
+  const [tier, setTier] = useState<SubscriptionTier | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [modalOpen, setModalOpen] = useState(false);
   const [selected, setSelected] = useState<Branch | null>(null);
+  const [limitsTarget, setLimitsTarget] = useState<Branch | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<Branch | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
+
   const fetchBranches = async () => {
     setLoading(true);
     setError('');
     try {
-      const data = await api.branches.list();
+      const [data, tierData] = await Promise.all([
+        api.branches.list(),
+        api.subscription.getTier(),
+      ]);
       setBranches(data);
+      setTier(tierData);
     } catch {
       setError('Failed to load branches');
     } finally {
@@ -56,6 +65,11 @@ export default function BranchesPage() {
     setModalOpen(false);
   };
 
+  const handleLimitsSaved = () => {
+    setLimitsTarget(null);
+    fetchBranches();
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -63,9 +77,6 @@ export default function BranchesPage() {
           <h2 className="text-2xl font-bold text-gray-900">Branches</h2>
           <p className="text-gray-500 text-sm mt-1">{branches.length} branch{branches.length !== 1 ? 'es' : ''}</p>
         </div>
-        {/* <button className="btn-primary" onClick={() => { setSelected(null); setModalOpen(true); }}>
-          <Plus className="w-4 h-4" /> Add Branch
-        </button> */}
       </div>
 
       {error && (
@@ -81,14 +92,15 @@ export default function BranchesPage() {
           <MapPin className="w-12 h-12 text-gray-300 mx-auto mb-4" />
           <h3 className="text-lg font-medium text-gray-900 mb-2">No branches yet</h3>
           <p className="text-gray-500 mb-6">Add your first branch to get started.</p>
-          {/* <button className="btn-primary" onClick={() => { setSelected(null); setModalOpen(true); }}>
-            <Plus className="w-4 h-4" /> Add Branch
-          </button> */}
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
           {branches.map((b) => {
             const manager = b.manager as { name: string; role: string } | undefined;
+            const sub = b.subscription;
+            const memberLimit = tier ? tier.memberLimit + (sub?.additionalMembers ?? 0) : null;
+            const staffLimit = tier ? tier.staffLimit + (sub?.additionalStaff ?? 0) : null;
+            const serviceLimit = tier ? tier.serviceLimit + (sub?.additionalServices ?? 0) : null;
             return (
               <div key={b._id} className="card hover:shadow-md transition-shadow">
                 <div className="flex items-start justify-between mb-3">
@@ -99,6 +111,13 @@ export default function BranchesPage() {
                     </span>
                   </div>
                   <div className="flex gap-1">
+                    <button
+                      onClick={() => setLimitsTarget(b)}
+                      className="p-1.5 text-gray-400 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-colors"
+                      title="Edit limits"
+                    >
+                      <SlidersHorizontal className="w-4 h-4" />
+                    </button>
                     <button
                       onClick={() => { setSelected(b); setModalOpen(true); }}
                       className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
@@ -135,6 +154,24 @@ export default function BranchesPage() {
                       <span>{b.openingHours}</span>
                     </div>
                   )}
+
+                  {tier && (
+                    <div className="mt-3 pt-3 border-t border-gray-100 grid grid-cols-3 gap-2 text-center">
+                      <div>
+                        <p className="text-xs text-gray-400">Members</p>
+                        <p className="font-semibold text-gray-900 text-sm">{memberLimit}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-400">Staff</p>
+                        <p className="font-semibold text-gray-900 text-sm">{staffLimit}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-400">Services</p>
+                        <p className="font-semibold text-gray-900 text-sm">{serviceLimit}</p>
+                      </div>
+                    </div>
+                  )}
+
                   {manager && (
                     <div className="mt-3 pt-3 border-t border-gray-100">
                       <p className="text-xs text-gray-400 mb-1">Branch Manager</p>
@@ -151,6 +188,14 @@ export default function BranchesPage() {
 
       {modalOpen && (
         <BranchModal branch={selected} onClose={() => setModalOpen(false)} onSaved={handleSaved} />
+      )}
+      {limitsTarget && tier && (
+        <BranchLimitsModal
+          branch={limitsTarget}
+          tier={tier}
+          onClose={() => setLimitsTarget(null)}
+          onSaved={handleLimitsSaved}
+        />
       )}
       {deleteTarget && (
         <ConfirmDialog

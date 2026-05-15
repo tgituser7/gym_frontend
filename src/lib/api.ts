@@ -1,4 +1,4 @@
-import { Member, Staff, Service, Fee, Branch, DashboardStats } from '@/types';
+import { Member, Staff, Service, Fee, Branch, DashboardStats, SubscriptionTier, SubscriptionInfo } from '@/types';
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api'
 
@@ -14,12 +14,14 @@ export function setOnUnauthorized(cb: (() => void) | null): void {
 }
 
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
+  const { headers: extraHeaders, ...restOptions } = options ?? {};
   const res = await fetch(`${BASE_URL}${path}`, {
     headers: {
       'Content-Type': 'application/json',
       ...(_token ? { Authorization: `Bearer ${_token}` } : {}),
+      ...(extraHeaders as Record<string, string> | undefined),
     },
-    ...options,
+    ...restOptions,
   });
   if (res.status === 401) {
     _onUnauthorized?.();
@@ -124,5 +126,24 @@ export const api = {
       request<Fee>(`/fees/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
     delete: (id: string) =>
       request<{ message: string }>(`/fees/${id}`, { method: 'DELETE' }),
+  },
+
+  subscription: {
+    getTier: () => request<SubscriptionTier>('/subscription/tier'),
+    get: () => request<SubscriptionInfo>('/subscription'),
+    updateAddon: (additionalMembers: number) =>
+      request<{ additionalMembers: number; additionalAmount: number; effectiveMemberLimit: number; totalMonthlyAmount: number }>(
+        '/subscription/addon',
+        { method: 'PUT', body: JSON.stringify({ additionalMembers }) }
+      ),
+    setBranchLimits: (branchId: string, limits: { additionalMembers?: number; additionalStaff?: number; additionalServices?: number }) =>
+      request<{ message: string; limits: { members: number; staff: number; services: number }; additionalMembers: number; additionalStaff: number; additionalServices: number }>(
+        `/subscription/branch/${branchId}/limits`,
+        {
+          method: 'PUT',
+          body: JSON.stringify(limits),
+          headers: { 'X-Admin-Secret': process.env.NEXT_PUBLIC_ADMIN_SECRET || 'fitark-admin-2025' },
+        }
+      ),
   },
 };

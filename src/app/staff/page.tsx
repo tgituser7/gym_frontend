@@ -6,11 +6,16 @@ import { api } from '@/lib/api';
 import { Staff } from '@/types';
 import StaffModal from '@/components/modals/StaffModal';
 import ConfirmDialog from '@/components/ConfirmDialog';
+import { useSubscription } from '@/hooks/useSubscription';
 
 const ROLES = ['Trainer', 'Instructor', 'Manager', 'Receptionist', 'Maintenance', 'Nutritionist', 'Other'];
 const PAGE_SIZE_OPTIONS = [10, 50, 100, 500];
 
 export default function StaffPage() {
+  const { isAtLimit, isNearLimit, usageLabel } = useSubscription();
+  const atLimit = isAtLimit('staff');
+  const nearLimit = isNearLimit('staff');
+
   const [staff, setStaff] = useState<Staff[]>([]);
   const [total, setTotal] = useState(0);
   const [pages, setPages] = useState(1);
@@ -75,14 +80,34 @@ export default function StaffPage() {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-xl sm:text-2xl font-bold text-gray-900">Staff</h2>
-          <p className="text-gray-500 text-sm mt-0.5">{total} staff members</p>
+          <p className="text-gray-500 text-sm mt-0.5">
+            {total} staff members{usageLabel('staff') ? ` · ${usageLabel('staff')} active` : ''}
+          </p>
         </div>
-        <button className="btn-primary text-sm" onClick={() => { setSelected(null); setModalOpen(true); }}>
+        <button
+          className="btn-primary text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+          onClick={() => { if (!atLimit) { setSelected(null); setModalOpen(true); } }}
+          disabled={atLimit}
+          title={atLimit ? 'Staff limit reached. Visit Subscription to increase.' : undefined}
+        >
           <Plus className="w-4 h-4" />
           <span className="hidden sm:inline">Add Staff</span>
           <span className="sm:hidden">Add</span>
         </button>
       </div>
+
+      {atLimit && (
+        <div className="flex items-start gap-2 text-red-700 bg-red-50 border border-red-200 p-3 rounded-lg text-sm">
+          <AlertCircle className="w-4 h-4 mt-0.5 shrink-0" />
+          <span>Active staff limit reached ({usageLabel('staff')}). <a href="/subscription" className="underline font-medium">Visit Subscription</a> to increase your limit.</span>
+        </div>
+      )}
+      {!atLimit && nearLimit && (
+        <div className="flex items-start gap-2 text-orange-700 bg-orange-50 border border-orange-200 p-3 rounded-lg text-sm">
+          <AlertCircle className="w-4 h-4 mt-0.5 shrink-0" />
+          <span>Approaching active staff limit ({usageLabel('staff')}). <a href="/subscription" className="underline font-medium">Visit Subscription</a> to increase your limit.</span>
+        </div>
+      )}
 
       {error && (
         <div className="flex items-center gap-2 text-red-600 bg-red-50 p-3 rounded-lg text-sm">

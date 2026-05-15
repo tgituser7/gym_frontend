@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
   LayoutDashboard, Users, UserCheck, Dumbbell,
-  DollarSign, LogOut, X, Bell,
+  DollarSign, LogOut, X, Bell, CreditCard,
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { Gym } from '@/types';
@@ -16,6 +16,7 @@ const navItems = [
   { href: '/services', label: 'Services', icon: Dumbbell },
   { href: '/fees', label: 'Fees', icon: DollarSign },
   { href: '/renewals', label: 'Renewals', icon: Bell },
+  { href: '/subscription', label: 'Subscription', icon: CreditCard },
   // { href: '/branches', label: 'Branches', icon: GitBranch },
 ];
 
